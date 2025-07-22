@@ -24,10 +24,10 @@ const int RELAY_PIN = 23;
 const int buzzerPin = 22;
 
 // For 3 instruments
-const int NUM_INSTRUMENTS = 3;
-const int sensorPins[NUM_INSTRUMENTS] = {12, 13, 14};   // Presence sensors
-const int relayPins[NUM_INSTRUMENTS]  = {25, 26, 27};   // Relays
-const int buttonPins[NUM_INSTRUMENTS] = {32, 33, 34};   // Buttons
+const int NUM_INSTRUMENTS = 2;
+const int sensorPins[NUM_INSTRUMENTS] = {12, 13};   // Only 2 sensors
+const int relayPins[NUM_INSTRUMENTS]  = {25, 26};
+const int buttonPins[NUM_INSTRUMENTS] = {32, 33};
 
 // Mode: 0 = check, 1 = enroll
 int mode = 0;
