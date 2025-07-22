@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Smart Cabinet{% endblock %}
+
+{% block content %}
+<div class="p-5 mb-4 bg-light rounded-3">
+  <div class="container-fluid py-5">
+    <h1 class="display-4">Welcome to Smart Cabinet!</h1>
+    <p class="lead">This is your modern Smart Cabinet web application. Use the navigation bar above to access the Dashboard or learn more About this project.</p>
+    <hr class="my-4">
+    <p>Get started by exploring the dashboard or reading more about the app.</p>
+    <a class="btn btn-primary btn-lg me-2" href="{{ url_for('dashboard') }}" role="button">Go to Dashboard</a>
+    <a class="btn btn-outline-secondary btn-lg" href="{{ url_for('about') }}" role="button">About</a>
+  </div>
+</div>
+{% endblock %}

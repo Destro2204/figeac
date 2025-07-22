@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Cabinet Stream - Smart Cabinet{% endblock %}
+
+{% block content %}
+<div id="stream-alert-area"></div>
+<div class="mb-3">
+    <img id="cabinet-stream" src="/video_feed" style="width:100%;max-width:640px;border:2px solid #007bff;border-radius:8px;" alt="Cabinet Stream" />
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// --- Real-time Vision Alerts via SSE for stream page ---
+const streamAlertArea = document.getElementById('stream-alert-area');
+const visionEvtSource = new EventSource('/events/vision-alert');
+let alertHistory = [];
+visionEvtSource.onmessage = function(event) {
+    const alert = JSON.parse(event.data);
+    // Prepend new alert
+    alertHistory.unshift(alert);
+    // Limit to 5 alerts
+    if (alertHistory.length > 5) alertHistory = alertHistory.slice(0, 5);
+    let html = '';
+    for (const a of alertHistory) {
+        html += `<div class="alert alert-warning"><strong>${a.alert_type}:</strong> ${a.message}`;
+        if (a.frame_urls && a.frame_urls.length > 0) {
+            html += '<div class="d-flex flex-wrap mt-2">';
+            for (const url of a.frame_urls) {
+                html += `<img src="${url}" style="max-width:120px;max-height:90px;margin-right:8px;margin-bottom:8px;">`;
+            }
+            html += '</div>';
+        }
+        html += '</div>';
+    }
+    streamAlertArea.innerHTML = html;
+};
+</script>
+{% endblock %} 
