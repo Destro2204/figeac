@@ -278,6 +278,12 @@ void checkFingerprint() {
   p = finger.fingerSearch();
   if (p == FINGERPRINT_OK) {
     Serial.print("Found ID #"); Serial.println(finger.fingerID);
+    // Prompt for instrument number
+    Serial.println("Enter instrument number (1 or 2):");
+    while (!Serial.available());
+    int instrument_id = Serial.parseInt();
+    Serial.print("Logging access for instrument "); Serial.println(instrument_id);
+
     // Verify with Flask API
     HTTPClient http;
     String url = String(server) + "/api/verify";
@@ -290,11 +296,11 @@ void checkFingerprint() {
     Serial.println(response);
     http.end();
 
-    // Log access attempt
+    // Log access attempt with instrument_id
     http.begin(String(server) + "/api/access-log");
     http.addHeader("Content-Type", "application/json");
     String status = (httpResponseCode == 200) ? "success" : "failure";
-    payload = "{\"fingerprint_ID\":" + String(finger.fingerID) + ",\"status\":\"" + status + "\"}";
+    payload = "{\"fingerprint_ID\":" + String(finger.fingerID) + ",\"status\":\"" + status + "\",\"instrument_id\":" + String(instrument_id) + "}";
     http.POST(payload);
     http.end();
 
