@@ -153,22 +153,21 @@
   <div class="cabinet-svg-section mb-4">
     <h3>Cabinet Layout (SVG Simulation)</h3>
     <svg id="cabinet-svg" width="600" height="600" viewBox="0 0 600 600" style="background:#222; border-radius:12px;">
-      <!-- Example instrument slots (circles and rectangles) -->
-      <!-- Left vertical row -->
-      <circle id="svg-slot-1" cx="80" cy="120" r="40" fill="green" stroke="#fff" stroke-width="4"/>
-      <circle id="svg-slot-2" cx="80" cy="260" r="40" fill="green" stroke="#fff" stroke-width="4"/>
-      <circle id="svg-slot-3" cx="80" cy="400" r="40" fill="green" stroke="#fff" stroke-width="4"/>
-      <!-- Middle vertical row -->
-      <rect id="svg-slot-4" x="180" y="80" width="60" height="60" rx="15" fill="green" stroke="#fff" stroke-width="4"/>
-      <circle id="svg-slot-5" cx="210" cy="260" r="40" fill="green" stroke="#fff" stroke-width="4"/>
-      <rect id="svg-slot-6" x="180" y="400" width="60" height="60" rx="15" fill="green" stroke="#fff" stroke-width="4"/>
-      <!-- Right vertical row -->
-      <circle id="svg-slot-7" cx="340" cy="120" r="40" fill="green" stroke="#fff" stroke-width="4"/>
-      <circle id="svg-slot-8" cx="340" cy="260" r="40" fill="green" stroke="#fff" stroke-width="4"/>
-      <circle id="svg-slot-9" cx="340" cy="400" r="40" fill="green" stroke="#fff" stroke-width="4"/>
-      <!-- Large rectangle (bottom right) -->
-      <rect id="svg-slot-10" x="420" y="320" width="120" height="160" rx="30" fill="green" stroke="#fff" stroke-width="4"/>
-      <!-- You can add more shapes to match your tray more closely -->
+      <!-- Left column: 3 round holders -->
+      <circle id="svg-slot-1" cx="90" cy="120" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+      <circle id="svg-slot-2" cx="90" cy="260" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+      <circle id="svg-slot-3" cx="90" cy="400" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+      <!-- Middle column: 2 squares, 1 round -->
+      <rect id="svg-slot-4" x="180" y="80" width="70" height="70" rx="15" fill="green" stroke="#fff" stroke-width="4"/>
+      <circle id="svg-slot-5" cx="215" cy="260" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+      <rect id="svg-slot-6" x="180" y="380" width="70" height="70" rx="15" fill="green" stroke="#fff" stroke-width="4"/>
+      <!-- Right column: 3 round holders -->
+      <circle id="svg-slot-7" cx="340" cy="120" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+      <circle id="svg-slot-8" cx="340" cy="260" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+      <circle id="svg-slot-9" cx="340" cy="400" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+      <!-- Large L-shaped/curved slot (approximate with path) -->
+      <path id="svg-slot-10" d="M 430 320 Q 570 320 570 400 Q 570 480 500 480 Q 430 480 430 400 Q 430 320 430 320 Z" fill="green" stroke="#fff" stroke-width="4"/>
+      <!-- Add more shapes as needed for your tray -->
     </svg>
   </div>
 
