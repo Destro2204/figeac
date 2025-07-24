@@ -128,6 +128,22 @@
     </div>
     <h4>Recent Access Logs</h4>
     <div id="overview-recent-logs"></div>
+    <!-- SVG Cabinet Visualization in Overview -->
+    <div class="cabinet-svg-section mb-4">
+      <h3>Cabinet Layout (SVG Simulation)</h3>
+      <svg id="cabinet-svg-overview" width="600" height="600" viewBox="0 0 600 600" style="background:#222; border-radius:12px;">
+        <circle id="svg-slot-1-overview" cx="90" cy="120" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+        <circle id="svg-slot-2-overview" cx="90" cy="260" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+        <circle id="svg-slot-3-overview" cx="90" cy="400" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+        <rect id="svg-slot-4-overview" x="180" y="80" width="70" height="70" rx="15" fill="green" stroke="#fff" stroke-width="4"/>
+        <circle id="svg-slot-5-overview" cx="215" cy="260" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+        <rect id="svg-slot-6-overview" x="180" y="380" width="70" height="70" rx="15" fill="green" stroke="#fff" stroke-width="4"/>
+        <circle id="svg-slot-7-overview" cx="340" cy="120" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+        <circle id="svg-slot-8-overview" cx="340" cy="260" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+        <circle id="svg-slot-9-overview" cx="340" cy="400" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+        <path id="svg-slot-10-overview" d="M 430 320 Q 570 320 570 400 Q 570 480 500 480 Q 430 480 430 400 Q 430 320 430 320 Z" fill="green" stroke="#fff" stroke-width="4"/>
+      </svg>
+    </div>
   </div>
   <!-- Employees Section -->
   <div id="employees-section" style="display:none;">
@@ -143,73 +159,28 @@
       <h2>Instruments</h2>
       <button class="btn btn-main" onclick="showAddInstrumentForm()"><i class="fa fa-plus"></i> Add Instrument</button>
     </div>
+    <!-- SVG Cabinet Visualization in Instruments -->
+    <div class="cabinet-svg-section mb-4">
+      <h3>Cabinet Layout (SVG Simulation)</h3>
+      <svg id="cabinet-svg-instruments" width="600" height="600" viewBox="0 0 600 600" style="background:#222; border-radius:12px;">
+        <circle id="svg-slot-1-instruments" cx="90" cy="120" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+        <circle id="svg-slot-2-instruments" cx="90" cy="260" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+        <circle id="svg-slot-3-instruments" cx="90" cy="400" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+        <rect id="svg-slot-4-instruments" x="180" y="80" width="70" height="70" rx="15" fill="green" stroke="#fff" stroke-width="4"/>
+        <circle id="svg-slot-5-instruments" cx="215" cy="260" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+        <rect id="svg-slot-6-instruments" x="180" y="380" width="70" height="70" rx="15" fill="green" stroke="#fff" stroke-width="4"/>
+        <circle id="svg-slot-7-instruments" cx="340" cy="120" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+        <circle id="svg-slot-8-instruments" cx="340" cy="260" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+        <circle id="svg-slot-9-instruments" cx="340" cy="400" r="45" fill="green" stroke="#fff" stroke-width="4"/>
+        <path id="svg-slot-10-instruments" d="M 430 320 Q 570 320 570 400 Q 570 480 500 480 Q 430 480 430 400 Q 430 320 430 320 Z" fill="green" stroke="#fff" stroke-width="4"/>
+      </svg>
+    </div>
     <div id="add-instrument-form" style="display:none; margin-bottom:1rem;">
       <input type="text" id="new-instrument-name" class="form-control d-inline-block w-auto" placeholder="Instrument Name">
       <button class="btn btn-main ms-2" onclick="addInstrument()">Save</button>
     </div>
     <div id="instruments-table"></div>
   </div>
-  <!-- Cabinet SVG Visualization Section -->
-  <div class="cabinet-svg-section mb-4">
-    <h3>Cabinet Layout (SVG Simulation)</h3>
-    <svg id="cabinet-svg" width="600" height="600" viewBox="0 0 600 600" style="background:#222; border-radius:12px;">
-      <!-- Left column: 3 round holders -->
-      <circle id="svg-slot-1" cx="90" cy="120" r="45" fill="green" stroke="#fff" stroke-width="4"/>
-      <circle id="svg-slot-2" cx="90" cy="260" r="45" fill="green" stroke="#fff" stroke-width="4"/>
-      <circle id="svg-slot-3" cx="90" cy="400" r="45" fill="green" stroke="#fff" stroke-width="4"/>
-      <!-- Middle column: 2 squares, 1 round -->
-      <rect id="svg-slot-4" x="180" y="80" width="70" height="70" rx="15" fill="green" stroke="#fff" stroke-width="4"/>
-      <circle id="svg-slot-5" cx="215" cy="260" r="45" fill="green" stroke="#fff" stroke-width="4"/>
-      <rect id="svg-slot-6" x="180" y="380" width="70" height="70" rx="15" fill="green" stroke="#fff" stroke-width="4"/>
-      <!-- Right column: 3 round holders -->
-      <circle id="svg-slot-7" cx="340" cy="120" r="45" fill="green" stroke="#fff" stroke-width="4"/>
-      <circle id="svg-slot-8" cx="340" cy="260" r="45" fill="green" stroke="#fff" stroke-width="4"/>
-      <circle id="svg-slot-9" cx="340" cy="400" r="45" fill="green" stroke="#fff" stroke-width="4"/>
-      <!-- Large L-shaped/curved slot (approximate with path) -->
-      <path id="svg-slot-10" d="M 430 320 Q 570 320 570 400 Q 570 480 500 480 Q 430 480 430 400 Q 430 320 430 320 Z" fill="green" stroke="#fff" stroke-width="4"/>
-      <!-- Add more shapes as needed for your tray -->
-    </svg>
-  </div>
-
-  <style>
-  .cabinet-svg-section {
-    text-align: center;
-    margin-top: 2rem;
-  }
-  </style>
-
-  <script>
-  function updateSVGSlots() {
-    fetch('/api/instruments')
-      .then(response => response.json())
-      .then(data => {
-        // Map instrument IDs to SVG slot IDs
-        const slotMap = {
-          1: 'svg-slot-1',
-          2: 'svg-slot-2',
-          3: 'svg-slot-3',
-          4: 'svg-slot-4',
-          5: 'svg-slot-5',
-          6: 'svg-slot-6',
-          7: 'svg-slot-7',
-          8: 'svg-slot-8',
-          9: 'svg-slot-9',
-          10: 'svg-slot-10'
-        };
-        data.forEach(inst => {
-          const svgId = slotMap[inst.id];
-          if (svgId) {
-            const slot = document.getElementById(svgId);
-            if (slot) {
-              slot.setAttribute('fill', inst.status === 'available' ? 'green' : 'red');
-            }
-          }
-        });
-      });
-  }
-  updateSVGSlots();
-  setInterval(updateSVGSlots, 2000);
-  </script>
   <!-- Access Logs Section -->
   <div id="logs-section" style="display:none;">
     <h2>Access Logs</h2>
