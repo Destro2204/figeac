@@ -159,6 +159,7 @@
     filter: drop-shadow(0 0 10px #ef444488) brightness(1.2) saturate(2) hue-rotate(-30deg);
     opacity: 0.85;
   }
+  .cabinet-sim-skeleton,
   .cabinet-sim-base,
   .cabinet-sim-overlay {
     position: absolute;
@@ -167,6 +168,7 @@
     display: block;
     pointer-events: none;
   }
+  .cabinet-sim-skeleton { z-index: 0; }
   .cabinet-sim-base { z-index: 1; }
   .cabinet-sim-overlay { z-index: 2; opacity: 1; transition: opacity 0.3s; }
   .cabinet-sim-overlay.hidden { opacity: 0; }
@@ -210,13 +212,13 @@
     <div id="overview-recent-logs"></div>
     <!-- Cabinet Layout Simulation (Overlay-based) -->
     <div class="cabinet-sim-section mb-4" style="position: relative; max-width: 300px; margin: auto;">
-      <img src="{{ url_for('static', filename='place_holder/overlay0.png') }}" alt="Cabinet Layout" id="cabinet-sim-bg" class="cabinet-sim-base">
-      <img src="{{ url_for('static', filename='place_holder/overlay1.png') }}" class="cabinet-sim-overlay" id="sim-overlay-1">
-      <img src="{{ url_for('static', filename='place_holder/overlay2.png') }}" class="cabinet-sim-overlay" id="sim-overlay-2">
-      <img src="{{ url_for('static', filename='place_holder/overlay3.png') }}" class="cabinet-sim-overlay" id="sim-overlay-3">
-      <img src="{{ url_for('static', filename='place_holder/overlay4.png') }}" class="cabinet-sim-overlay" id="sim-overlay-4">
-      <img src="{{ url_for('static', filename='place_holder/overlay5.png') }}" class="cabinet-sim-overlay" id="sim-overlay-5">
-      <img src="{{ url_for('static', filename='place_holder/overlay6.png') }}" class="cabinet-sim-overlay" id="sim-overlay-6">
+      <img src="{{ url_for('static', filename='place_holder/overlay0.png') }}" alt="Cabinet Skeleton" class="cabinet-sim-skeleton">
+      <img src="{{ url_for('static', filename='place_holder/overlay1.png') }}" alt="Cabinet Red Base" id="cabinet-sim-bg" class="cabinet-sim-base">
+      <img src="{{ url_for('static', filename='place_holder/overlay2.png') }}" class="cabinet-sim-overlay" id="sim-overlay-1">
+      <img src="{{ url_for('static', filename='place_holder/overlay3.png') }}" class="cabinet-sim-overlay" id="sim-overlay-2">
+      <img src="{{ url_for('static', filename='place_holder/overlay4.png') }}" class="cabinet-sim-overlay" id="sim-overlay-3">
+      <img src="{{ url_for('static', filename='place_holder/overlay5.png') }}" class="cabinet-sim-overlay" id="sim-overlay-4">
+      <img src="{{ url_for('static', filename='place_holder/overlay6.png') }}" class="cabinet-sim-overlay" id="sim-overlay-5">
     </div>
   </div>
   <!-- Employees Section -->
@@ -494,8 +496,8 @@ function updateCabinetSimOverlays() {
   fetch('/api/instruments')
     .then(response => response.json())
     .then(data => {
-      // overlays 1-6 correspond to instruments 0-5
-      for (let i = 1; i <= 6; i++) {
+      // overlays 1-5 correspond to instruments 0-4
+      for (let i = 1; i <= 5; i++) {
         const overlay = document.getElementById(`sim-overlay-${i}`);
         if (overlay && data[i-1]) {
           if (data[i-1].status === 'available') {
