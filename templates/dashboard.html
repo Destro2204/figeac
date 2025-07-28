@@ -90,6 +90,33 @@
   .modal-content {
     border-radius: 1rem;
   }
+  .instrument-3d {
+    position: relative;
+    max-width: 200px;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  .instrument-img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 5px solid #ccc;
+    transition: border 0.3s, filter 0.3s;
+  }
+  .instrument-3d.available .instrument-img {
+    border-color: #22c55e;
+    filter: drop-shadow(0 0 10px #22c55e88);
+  }
+  .instrument-3d.taken .instrument-img {
+    border-color: #ef4444;
+    filter: drop-shadow(0 0 10px #ef444488);
+  }
+  .instrument-label {
+    text-align: center;
+    margin-top: 5px;
+    font-weight: bold;
+  }
 </style>
 <div class="sidebar">
   <h3 class="text-center mb-4"><i class="fa-solid fa-cube"></i> Smart Cabinet</h3>
@@ -153,15 +180,23 @@
       <h2>Instruments</h2>
       <button class="btn btn-main" onclick="showAddInstrumentForm()"><i class="fa fa-plus"></i> Add Instrument</button>
     </div>
-    <!-- SVG Cabinet Visualization in Instruments (for 2 instruments) -->
-    <div class="cabinet-svg-section mb-4">
-      <h3>Cabinet Layout (SVG Simulation)</h3>
-      <svg id="cabinet-svg-instruments" width="400" height="250" viewBox="0 0 400 250" style="background:#222; border-radius:12px;">
-        <circle id="svg-slot-1-instruments" cx="100" cy="125" r="60" fill="green" stroke="#fff" stroke-width="4"/>
-        <text id="svg-label-1-instruments" x="100" y="125" text-anchor="middle" alignment-baseline="middle" font-size="18" fill="#fff">Instrument 1</text>
-        <circle id="svg-slot-2-instruments" cx="300" cy="125" r="60" fill="green" stroke="#fff" stroke-width="4"/>
-        <text id="svg-label-2-instruments" x="300" y="125" text-anchor="middle" alignment-baseline="middle" font-size="18" fill="#fff">Instrument 2</text>
-      </svg>
+    <!-- Cabinet Layout (3D Visualization) -->
+    <div class="cabinet-3d-section mb-4">
+      <h3>Cabinet Layout (3D Visualization)</h3>
+      <div id="cabinet-3d-instruments" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: flex-start; align-items: center;">
+        <div class="instrument-3d" id="instrument-3d-1">
+          <img src="{{ url_for('static', filename='support3D_1.jpeg') }}" alt="Instrument 1" class="instrument-img">
+          <div class="instrument-label">Instrument 1</div>
+        </div>
+        <div class="instrument-3d" id="instrument-3d-2">
+          <img src="{{ url_for('static', filename='support3D_2.jpeg') }}" alt="Instrument 2" class="instrument-img">
+          <div class="instrument-label">Instrument 2</div>
+        </div>
+        <div class="instrument-3d" id="instrument-3d-3">
+          <img src="{{ url_for('static', filename='support3D_3.jpeg') }}" alt="Instrument 3" class="instrument-img">
+          <div class="instrument-label">Instrument 3</div>
+        </div>
+      </div>
     </div>
     <!-- Instrument 3D Views Enhancement -->
     <div class="mb-4">
@@ -409,5 +444,23 @@ function updateAllSVGSlots() {
 }
 updateAllSVGSlots();
 setInterval(updateAllSVGSlots, 2000);
+
+function updateInstrument3DStatus() {
+  fetch('/api/instruments')
+    .then(response => response.json())
+    .then(data => {
+      data.slice(0,3).forEach((inst, idx) => {
+        const container = document.getElementById(`instrument-3d-${idx+1}`);
+        if (container) {
+          container.classList.remove('available', 'taken');
+          container.classList.add(inst.status === 'available' ? 'available' : 'taken');
+          const label = container.querySelector('.instrument-label');
+          if (label) label.textContent = `${inst.name} (${inst.status})`;
+        }
+      });
+    });
+}
+updateInstrument3DStatus();
+setInterval(updateInstrument3DStatus, 2000);
 </script>
 {% endblock %} 
