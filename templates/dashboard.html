@@ -163,6 +163,15 @@
         <text id="svg-label-2-instruments" x="300" y="125" text-anchor="middle" alignment-baseline="middle" font-size="18" fill="#fff">Instrument 2</text>
       </svg>
     </div>
+    <!-- Instrument 3D Views Enhancement -->
+    <div class="mb-4">
+      <h3>Instrument 3D Views</h3>
+      <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: flex-start; align-items: center;">
+        <img src="{{ url_for('static', filename='support3D_1.jpeg') }}" alt="Instrument 3D View 1" style="max-width: 200px; width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <img src="{{ url_for('static', filename='support3D_2.jpeg') }}" alt="Instrument 3D View 2" style="max-width: 200px; width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <img src="{{ url_for('static', filename='support3D_3.jpeg') }}" alt="Instrument 3D View 3" style="max-width: 200px; width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+      </div>
+    </div>
     <div id="add-instrument-form" style="display:none; margin-bottom:1rem;">
       <input type="text" id="new-instrument-name" class="form-control d-inline-block w-auto" placeholder="Instrument Name">
       <button class="btn btn-main ms-2" onclick="addInstrument()">Save</button>
