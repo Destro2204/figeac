@@ -119,9 +119,17 @@
   }
   .cabinet-enhanced-section { max-width: 600px; margin: auto; position: relative; }
   .cabinet-overlay {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0.7;
     transition: filter 0.3s, opacity 0.3s;
     z-index: 2;
   }
+  .overlay1 { top: 8%; left: 3%; width: 18%; }
+  .overlay2 { top: 8%; left: 38%; width: 16%; }
+  .overlay3 { top: 8%; left: 70%; width: 18%; }
+  .overlay4 { top: 60%; left: 22%; width: 16%; }
+  .overlay5 { top: 60%; left: 54%; width: 16%; }
   .cabinet-overlay.available {
     filter: drop-shadow(0 0 10px #22c55e88) brightness(1.2) saturate(2) hue-rotate(70deg);
     opacity: 0.85;
@@ -196,11 +204,11 @@
     <!-- Enhanced Cabinet Layout with Exact Shape Overlays -->
     <div class="cabinet-enhanced-section mb-4" style="position: relative; max-width: 600px; margin: auto;">
       <img src="{{ url_for('static', filename='support3D_3.jpeg') }}" alt="Cabinet Layout" id="cabinet-bg" style="width: 100%; display: block; border-radius: 12px;">
-      <img src="{{ url_for('static', filename='place_holder/overlay1.png') }}" class="cabinet-overlay" id="overlay-1" style="position: absolute; top: 7%; left: 2%; width: 28%; pointer-events: none; opacity: 0.7;">
-      <img src="{{ url_for('static', filename='place_holder/overlay2.png') }}" class="cabinet-overlay" id="overlay-2" style="position: absolute; top: 7%; left: 36%; width: 28%; pointer-events: none; opacity: 0.7;">
-      <img src="{{ url_for('static', filename='place_holder/overlay3.png') }}" class="cabinet-overlay" id="overlay-3" style="position: absolute; top: 7%; left: 70%; width: 28%; pointer-events: none; opacity: 0.7;">
-      <img src="{{ url_for('static', filename='place_holder/overlay4.png') }}" class="cabinet-overlay" id="overlay-4" style="position: absolute; top: 55%; left: 20%; width: 28%; pointer-events: none; opacity: 0.7;">
-      <img src="{{ url_for('static', filename='place_holder/overlay5.png') }}" class="cabinet-overlay" id="overlay-5" style="position: absolute; top: 55%; left: 52%; width: 28%; pointer-events: none; opacity: 0.7;">
+      <img src="{{ url_for('static', filename='place_holder/overlay1.png') }}" class="cabinet-overlay overlay1" id="overlay-1">
+      <img src="{{ url_for('static', filename='place_holder/overlay2.png') }}" class="cabinet-overlay overlay2" id="overlay-2">
+      <img src="{{ url_for('static', filename='place_holder/overlay3.png') }}" class="cabinet-overlay overlay3" id="overlay-3">
+      <img src="{{ url_for('static', filename='place_holder/overlay4.png') }}" class="cabinet-overlay overlay4" id="overlay-4">
+      <img src="{{ url_for('static', filename='place_holder/overlay5.png') }}" class="cabinet-overlay overlay5" id="overlay-5">
     </div>
     <!-- Instrument 3D Views Enhancement -->
     <div class="mb-4">
