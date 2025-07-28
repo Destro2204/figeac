@@ -212,6 +212,14 @@
     <div id="overview-recent-logs"></div>
     <!-- Cabinet Layout Simulation (Overlay-based) -->
     <div class="cabinet-sim-section mb-4" style="position: relative; max-width: 300px; margin: auto;">
+      <div style="position: absolute; left: 105%; top: 0; display: flex; flex-direction: column; gap: 8px;">
+        <label><input type="checkbox" class="sim-toggle" data-idx="1" checked> Instrument 1</label>
+        <label><input type="checkbox" class="sim-toggle" data-idx="2" checked> Instrument 2</label>
+        <label><input type="checkbox" class="sim-toggle" data-idx="3" checked> Instrument 3</label>
+        <label><input type="checkbox" class="sim-toggle" data-idx="4" checked> Instrument 4</label>
+        <label><input type="checkbox" class="sim-toggle" data-idx="5" checked> Instrument 5</label>
+        <label><input type="checkbox" class="sim-toggle" data-idx="6" checked> Instrument 6</label>
+      </div>
       <img src="{{ url_for('static', filename='place_holder/overlay0.png') }}" alt="Cabinet Skeleton" class="cabinet-sim-skeleton">
       <img src="{{ url_for('static', filename='place_holder/overlay1.png') }}" alt="Cabinet Red Base" id="cabinet-sim-bg" class="cabinet-sim-base">
       <img src="{{ url_for('static', filename='place_holder/overlay2.png') }}" class="cabinet-sim-overlay" id="sim-overlay-1">
@@ -511,5 +519,20 @@ function updateCabinetSimOverlays() {
 }
 updateCabinetSimOverlays();
 setInterval(updateCabinetSimOverlays, 2000);
+
+// Manual checkbox toggling for overlays (testing only)
+document.querySelectorAll('.sim-toggle').forEach(cb => {
+  cb.addEventListener('change', function() {
+    const idx = this.getAttribute('data-idx');
+    const overlay = document.getElementById(`sim-overlay-${idx}`);
+    if (overlay) {
+      if (this.checked) {
+        overlay.classList.remove('hidden');
+      } else {
+        overlay.classList.add('hidden');
+      }
+    }
+  });
+});
 </script>
 {% endblock %} 
