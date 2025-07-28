@@ -125,11 +125,11 @@
     transition: filter 0.3s, opacity 0.3s;
     z-index: 2;
   }
-  .overlay1 { top: 8%; left: 3%; width: 18%; }
-  .overlay2 { top: 8%; left: 38%; width: 16%; }
-  .overlay3 { top: 8%; left: 70%; width: 18%; }
-  .overlay4 { top: 60%; left: 22%; width: 16%; }
-  .overlay5 { top: 60%; left: 54%; width: 16%; }
+  .overlay2 { top: 8%; left: 3%; width: 18%; }
+  .overlay3 { top: 8%; left: 38%; width: 16%; }
+  .overlay4 { top: 8%; left: 70%; width: 18%; }
+  .overlay5 { top: 60%; left: 22%; width: 16%; }
+  .overlay6 { top: 60%; left: 54%; width: 16%; }
   .cabinet-overlay.available {
     filter: drop-shadow(0 0 10px #22c55e88) brightness(1.2) saturate(2) hue-rotate(70deg);
     opacity: 0.85;
@@ -203,12 +203,12 @@
     </div>
     <!-- Enhanced Cabinet Layout with Exact Shape Overlays -->
     <div class="cabinet-enhanced-section mb-4" style="position: relative; max-width: 600px; margin: auto;">
-      <img src="{{ url_for('static', filename='support3D_3.jpeg') }}" alt="Cabinet Layout" id="cabinet-bg" style="width: 100%; display: block; border-radius: 12px;">
-      <img src="{{ url_for('static', filename='place_holder/overlay1.png') }}" class="cabinet-overlay overlay1" id="overlay-1">
+      <img src="{{ url_for('static', filename='place_holder/overlay1.png') }}" alt="Cabinet Layout" id="cabinet-bg" style="width: 100%; display: block; border-radius: 12px;">
       <img src="{{ url_for('static', filename='place_holder/overlay2.png') }}" class="cabinet-overlay overlay2" id="overlay-2">
       <img src="{{ url_for('static', filename='place_holder/overlay3.png') }}" class="cabinet-overlay overlay3" id="overlay-3">
       <img src="{{ url_for('static', filename='place_holder/overlay4.png') }}" class="cabinet-overlay overlay4" id="overlay-4">
       <img src="{{ url_for('static', filename='place_holder/overlay5.png') }}" class="cabinet-overlay overlay5" id="overlay-5">
+      <img src="{{ url_for('static', filename='place_holder/overlay6.png') }}" class="cabinet-overlay overlay6" id="overlay-6">
     </div>
     <!-- Instrument 3D Views Enhancement -->
     <div class="mb-4">
@@ -435,13 +435,13 @@ function updateCabinetOverlays() {
   fetch('/api/instruments')
     .then(response => response.json())
     .then(data => {
-      // Map overlays to instruments by index (1-based)
-      for (let i = 1; i <= 5; i++) {
+      // Map overlays to instruments by index (starting from overlay-2)
+      for (let i = 2; i <= 6; i++) {
         const overlay = document.getElementById(`overlay-${i}`);
-        if (overlay && data[i-1]) {
+        if (overlay && data[i-2]) {
           overlay.classList.remove('available', 'taken');
-          overlay.classList.add(data[i-1].status === 'available' ? 'available' : 'taken');
-          overlay.title = `${data[i-1].name} (${data[i-1].status})`;
+          overlay.classList.add(data[i-2].status === 'available' ? 'available' : 'taken');
+          overlay.title = `${data[i-2].name} (${data[i-2].status})`;
         }
       }
     });
