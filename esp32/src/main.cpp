@@ -342,14 +342,6 @@ void checkFingerprint() {
     Serial.println(response);
     http.end();
 
-    // Log access attempt with instrument_id
-    http.begin(String(server) + "/api/access-log");
-    http.addHeader("Content-Type", "application/json");
-    String status = (httpResponseCode == 200) ? "success" : "failure";
-    payload = "{\"fingerprint_ID\":" + String(finger.fingerID) + ",\"status\":\"" + status + "\",\"instrument_id\":" + String(instrument_id) + "}";
-    http.POST(payload);
-    http.end();
-
     if (httpResponseCode == 200) {
       Serial.println("Access Granted! Opening door.");
       digitalWrite(RELAY_PIN, LOW); // Open door
@@ -364,8 +356,7 @@ void checkFingerprint() {
       doorHttp.POST(doorPayload);
       doorHttp.end();
 
-      // --- Add instrument status update here ---
-      // Fetch current status from backend
+      // Fetch current status from backend to determine action
       HTTPClient getHttp;
       String getUrl = String(server) + "/api/instruments";
       getHttp.begin(getUrl);
@@ -390,17 +381,25 @@ void checkFingerprint() {
               }
           }
       }
-      HTTPClient http;
-      String url = String(server) + "/api/instruments/" + String(instrument_id);
-      http.begin(url);
+
+      // Log the actual instrument action (taken/available)
+      http.begin(String(server) + "/api/access-log");
       http.addHeader("Content-Type", "application/json");
-      String payload = "{\"status\":\"" + newStatus + "\"}";
-      int putResponse = http.PUT(payload);
+      payload = "{\"fingerprint_ID\":" + String(finger.fingerID) + ",\"status\":\"" + newStatus + "\",\"instrument_id\":" + String(instrument_id) + "}";
+      http.POST(payload);
+      http.end();
+
+      // Update instrument status
+      HTTPClient putHttp;
+      String url = String(server) + "/api/instruments/" + String(instrument_id);
+      putHttp.begin(url);
+      putHttp.addHeader("Content-Type", "application/json");
+      String putPayload = "{\"status\":\"" + newStatus + "\"}";
+      int putResponse = putHttp.PUT(putPayload);
       Serial.print("PUT /api/instruments/"); Serial.print(instrument_id);
       Serial.print(" status: "); Serial.println(putResponse);
-      Serial.print("Response: "); Serial.println(http.getString());
-      http.end();
-      // --- End instrument status update ---
+      Serial.print("Response: "); Serial.println(putHttp.getString());
+      putHttp.end();
 
       delay(10000); // Keep door open for 10 seconds
       digitalWrite(RELAY_PIN, HIGH); // Close door
@@ -416,6 +415,13 @@ void checkFingerprint() {
       doorHttp2.end();
     } else {
       Serial.println("Access Denied!");
+      // Log the access denial
+      http.begin(String(server) + "/api/access-log");
+      http.addHeader("Content-Type", "application/json");
+      payload = "{\"fingerprint_ID\":" + String(finger.fingerID) + ",\"status\":\"failure\",\"instrument_id\":" + String(instrument_id) + "}";
+      http.POST(payload);
+      http.end();
+      
       digitalWrite(buzzerPin, HIGH);
       delay(1000);
       digitalWrite(buzzerPin, LOW);

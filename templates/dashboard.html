@@ -4,67 +4,260 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
   :root {
-    --main-blue: #2563eb;
-    --accent: #38bdf8;
-    --bg: #f4f8fb;
-    --card-bg: #fff;
-    --sidebar-bg: #1e293b;
-    --sidebar-active: #2563eb;
-    --sidebar-hover: #334155;
-    --text-main: #22223b;
+    /* Dark theme with high contrast for factory environments */
+    --bg-primary: #0a0a0b;
+    --bg-secondary: #1a1a1d;
+    --bg-card: #252529;
+    --bg-sidebar: #141416;
+    --bg-hover: #2d2d32;
+    --bg-active: #3a3a40;
+    
+    /* High contrast text colors */
+    --text-primary: #ffffff;
+    --text-secondary: #e0e0e0;
+    --text-muted: #a0a0a0;
+    
+    /* Status colors with high contrast */
+    --color-success: #00ff88;
+    --color-warning: #ffaa00;
+    --color-danger: #ff4444;
+    --color-info: #00aaff;
+    
+    /* Interactive elements */
+    --color-primary: #0066ff;
+    --color-primary-hover: #0052cc;
+    --border-color: #404044;
+    --shadow-color: rgba(0, 0, 0, 0.5);
   }
-  body { background: var(--bg); }
-  .sidebar {
-    min-height: 100vh;
-    background: var(--sidebar-bg);
-    color: #fff;
-    padding-top: 2rem;
-    position: fixed;
-    width: 220px;
-    z-index: 100;
-    box-shadow: 2px 0 8px rgba(30,41,59,0.08);
-  }
-  .sidebar a {
-    color: #fff;
-    display: block;
-    padding: 0.75rem 1.5rem;
+  
+  * {
+    margin: 0;
+    padding: 0;
+    outline: 0;
+    appearance: none;
     text-decoration: none;
+    list-style: none;
+    box-sizing: border-box;
+  }
+
+  html {
+    font-size: 16px; /* Larger base font size for factory workers */
+  }
+  
+  body { 
+    width: 100vw;
+    height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1rem;
+    font-weight: 500; /* Slightly bolder for better readability */
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    user-select: none;
+    overflow-x: hidden;
+  }
+  /* Remove sidebar and make full-width layout */
+  .sidebar {
+    display: none; /* Hide the old sidebar */
+  }
+  
+  /* New top navigation bar */
+  .top-nav {
+    width: 100%;
+    background: var(--bg-sidebar);
+    color: var(--text-primary);
+    padding: 1rem 2rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    border-bottom: 2px solid var(--border-color);
+    box-shadow: 0 2px 8px var(--shadow-color);
+  }
+  
+  .top-nav-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  .nav-brand {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+  }
+  
+  .nav-brand i {
+    margin-right: 0.5rem;
+    font-size: 1.6rem;
+  }
+  
+  .nav-links {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .nav-links a {
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1.2rem;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+    min-height: 48px;
+  }
+  
+  .nav-links a i {
     font-size: 1.1rem;
-    border-left: 4px solid transparent;
-    transition: background 0.2s, border-color 0.2s, color 0.2s;
+    margin-right: 0.5rem;
   }
-  .sidebar a.active {
-    background: var(--sidebar-active);
-    color: #fff;
-    border-left: 4px solid var(--accent);
+  
+  .nav-links a.active {
+    background: var(--bg-active);
+    color: var(--text-primary);
+    border-color: var(--color-primary);
   }
-  .sidebar a:hover {
-    background: var(--sidebar-hover);
-    color: var(--accent);
-    border-left: 4px solid var(--accent);
+  
+  .nav-links a:hover {
+    background: var(--bg-hover);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
   }
+  
+  /* Full-width main content */
   .main-content {
-    margin-left: 240px;
-    padding: 2rem 2rem 2rem 2rem;
-    min-height: 100vh;
-    background: var(--bg);
-    transition: background 0.3s;
+    margin-left: 0;
+    margin-top: 80px; /* Account for top nav */
+    padding: 2rem;
+    min-height: calc(100vh - 80px);
+    background: var(--bg-secondary);
+    width: 100%;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
   }
+  
+
   .summary-card {
-    min-width: 180px;
-    margin-right: 1rem;
-    background: var(--card-bg);
-    border: none;
-    box-shadow: 0 2px 8px rgba(30,41,59,0.07);
-    transition: transform 0.2s, box-shadow 0.2s;
+    min-width: 200px;
+    max-width: 300px;
+    margin: 0 1rem 1rem 0;
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    transition: all 0.3s ease;
+    padding: 1.5rem;
   }
+  
   .summary-card:hover {
-    transform: translateY(-4px) scale(1.03);
-    box-shadow: 0 6px 24px rgba(56,189,248,0.13);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px var(--shadow-color);
+    border-color: var(--color-primary);
+  }
+  
+  .summary-card .card-body {
+    padding: 0;
+    text-align: center;
+  }
+  
+  .summary-card h5 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: 1rem 0 0.5rem 0;
+  }
+  
+  .summary-card h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+  }
+  
+  .summary-card i {
+    font-size: 2.5rem !important;
+    margin-bottom: 1rem !important;
   }
   .badge-status {
-    font-size: 1em;
-    padding: 0.5em 1em;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .table {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    font-size: 1rem;
+    border: 2px solid var(--border-color);
+  }
+  
+  .table th {
+    background: var(--color-primary);
+    color: #ffffff;
+    font-weight: 700;
+    padding: 1.2rem;
+    border: none;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .table td {
+    padding: 1.2rem;
+    border: none;
+    color: var(--text-primary);
+    font-weight: 500;
+    background: var(--bg-card);
+  }
+  
+  .table-striped>tbody>tr:nth-of-type(odd) td {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+  
+  .table-striped>tbody>tr:nth-of-type(even) td {
+    background: var(--bg-card);
+    color: var(--text-primary);
+  }
+  
+  .table-striped>tbody>tr:hover td {
+    background: var(--bg-active) !important;
+    color: #ffffff !important;
+    transform: scale(1.01);
+    transition: all 0.2s ease;
+  }
+  
+  /* Improve badge contrast */
+  .bg-success {
+    background-color: var(--color-success) !important;
+    color: #000000 !important;
+    font-weight: 700 !important;
+  }
+  
+  .bg-danger {
+    background-color: var(--color-danger) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+  }
+  
+  .bg-warning {
+    background-color: var(--color-warning) !important;
+    color: #000000 !important;
+    font-weight: 700 !important;
   }
   .table-striped>tbody>tr {
     transition: background 0.3s;
@@ -78,13 +271,13 @@
     to { background: #e0f2fe; }
   }
   .btn-main {
-    background: var(--main-blue);
+    background: var(--color-primary);
     color: #fff;
     border: none;
     transition: background 0.2s;
   }
   .btn-main:hover {
-    background: var(--accent);
+    background: var(--color-primary-hover);
     color: #fff;
   }
   .modal-content {
@@ -105,11 +298,11 @@
     transition: border 0.3s, filter 0.3s;
   }
   .instrument-3d.available .instrument-img {
-    border-color: #22c55e;
+    border-color: var(--color-success);
     filter: drop-shadow(0 0 10px #22c55e88);
   }
   .instrument-3d.taken .instrument-img {
-    border-color: #ef4444;
+    border-color: var(--color-danger);
     filter: drop-shadow(0 0 10px #ef444488);
   }
   .instrument-label {
@@ -117,109 +310,359 @@
     margin-top: 5px;
     font-weight: bold;
   }
-  .cabinet-enhanced-section { max-width: 600px; margin: auto; position: relative; }
-  .cabinet-overlay {
-    position: absolute;
-    pointer-events: none;
-    opacity: 0.7;
-    transition: filter 0.3s, opacity 0.3s;
-    z-index: 2;
+
+
+  .cabinet-sim-section {
+    isolation: isolate; /* Create new stacking context */
   }
-  .overlay2 { top: 8%; left: 3%; width: 18%; }
-  .overlay3 { top: 8%; left: 38%; width: 16%; }
-  .overlay4 { top: 8%; left: 70%; width: 18%; }
-  .overlay5 { top: 60%; left: 22%; width: 16%; }
-  .overlay6 { top: 60%; left: 54%; width: 16%; }
-  .cabinet-overlay.available {
-    filter: drop-shadow(0 0 10px #22c55e88) brightness(1.2) saturate(2) hue-rotate(70deg);
-    opacity: 0.85;
+  /* Typography improvements for factory workers */
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 1rem;
   }
-  .cabinet-overlay.taken {
-    filter: drop-shadow(0 0 10px #ef444488) brightness(1.2) saturate(2) hue-rotate(-30deg);
-    opacity: 0.85;
+  
+  h1 { font-size: 2.5rem; }
+  h2 { font-size: 2rem; margin-bottom: 1.5rem; }
+  h3 { font-size: 1.5rem; }
+  h4 { font-size: 1.3rem; margin: 2rem 0 1rem 0; }
+  h5 { font-size: 1.1rem; }
+  
+  /* Content sections spacing */
+  .main-content > div {
+    margin-bottom: 3rem;
   }
-  .cabinet-sim-section { max-width: 300px; margin: auto; position: relative; }
-  .cabinet-sim-overlay {
-    position: absolute;
-    pointer-events: none;
-    opacity: 0.7;
-    transition: filter 0.3s, opacity 0.3s;
-    z-index: 2;
+  
+  /* Form elements */
+  .form-control, .form-select {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+    min-height: 48px; /* Touch-friendly */
   }
-  .sim-overlay2 { top: 8%; left: 3%; width: 18%; }
-  .sim-overlay3 { top: 8%; left: 38%; width: 16%; }
-  .sim-overlay4 { top: 8%; left: 70%; width: 18%; }
-  .sim-overlay5 { top: 60%; left: 22%; width: 16%; }
-  .sim-overlay6 { top: 60%; left: 54%; width: 16%; }
-  .cabinet-sim-overlay.available {
-    filter: drop-shadow(0 0 10px #22c55e88) brightness(1.2) saturate(2) hue-rotate(70deg);
-    opacity: 0.85;
+  
+  .form-control:focus, .form-select:focus {
+    background: var(--bg-card);
+    border-color: var(--color-primary);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.3);
   }
-  .cabinet-sim-overlay.taken {
-    filter: drop-shadow(0 0 10px #ef444488) brightness(1.2) saturate(2) hue-rotate(-30deg);
-    opacity: 0.85;
+  
+  /* Button improvements */
+  .btn {
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    min-height: 48px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
   }
+  
+  .btn-secondary {
+    background: var(--bg-active);
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
+  }
+  
+  .btn-secondary:hover {
+    background: var(--bg-hover);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+  /* Modal improvements */
+  .modal-content {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    color: var(--text-primary);
+  }
+  
+  .modal-header {
+    border-bottom: 2px solid var(--border-color);
+    padding: 1.5rem;
+  }
+  
+  .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .modal-footer {
+    border-top: 2px solid var(--border-color);
+    padding: 1.5rem;
+  }
+  
+  /* Status text colors with better contrast */
+  .text-success { 
+    color: var(--color-success) !important; 
+    font-weight: 600 !important;
+  }
+  .text-warning { 
+    color: var(--color-warning) !important; 
+    font-weight: 600 !important;
+  }
+  .text-danger { 
+    color: var(--color-danger) !important; 
+    font-weight: 600 !important;
+  }
+  .text-muted { 
+    color: #cccccc !important; 
+    font-weight: 600 !important;
+  }
+  
+  /* Ensure action text is visible on hover */
+  .table-striped>tbody>tr:hover .text-success {
+    color: #ffffff !important;
+  }
+  .table-striped>tbody>tr:hover .text-warning {
+    color: #ffffff !important;
+  }
+  .table-striped>tbody>tr:hover .text-danger {
+    color: #ffffff !important;
+  }
+  .table-striped>tbody>tr:hover .text-muted {
+    color: #ffffff !important;
+  }
+  
+
+  
+  /* Summary cards layout for full width */
+  .summary-cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  
+  .summary-card {
+    min-width: 250px;
+    margin: 0;
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    transition: all 0.3s ease;
+    padding: 1.5rem;
+  }
+  
+  /* Table improvements for full width */
+  .table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin: 1rem 0;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    background: var(--bg-card);
+  }
+  
+  .table {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-radius: 12px;
+    overflow: hidden;
+    font-size: 1rem;
+    border: 2px solid var(--border-color);
+    width: 100%;
+    margin-bottom: 0;
+    min-width: 600px; /* Reduced minimum width */
+  }
+  
+  /* Content sections with better spacing */
+  .content-section {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 2px solid var(--border-color);
+    box-shadow: 0 4px 12px var(--shadow-color);
+  }
+  
+  /* Responsive adjustments for smaller screens */
+  @media (max-width: 1200px) {
+    .table {
+      font-size: 0.9rem;
+    }
+    
+    .table th,
+    .table td {
+      padding: 0.8rem;
+    }
+  }
+  
+  /* Main content improvements for better layout */
+  .main-content {
+    margin-left: 300px;
+    padding: 2rem;
+    min-height: 100vh;
+    background: var(--bg-secondary);
+    transition: all 0.3s ease;
+    max-width: calc(100vw - 320px); /* Prevent content overflow */
+  }
+  
+  /* Responsive flex layout */
+  .d-flex {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  /* Filter controls spacing */
+  .mb-3 {
+    margin-bottom: 2rem !important;
+  }
+  
+  /* Alert-style improvements */
+  .alert {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-primary);
+    padding: 1.5rem;
+    font-size: 1.1rem;
+  }
+  
+  .alert-info {
+    border-color: var(--color-info);
+    background: rgba(0, 170, 255, 0.1);
+  }
+  /* Clean Cabinet Layout - No Borders */
+  .cabinet-sim-section {
+    padding: 2rem;
+    margin: 2rem auto;
+    max-width: 600px;
+    position: relative;
+    min-height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Cabinet image container */
+  .cabinet-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* All cabinet images - properly layered */
   .cabinet-sim-skeleton,
   .cabinet-sim-base,
   .cabinet-sim-overlay {
     position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 100%;
+    height: auto;
     display: block;
     pointer-events: none;
   }
-  .cabinet-sim-skeleton { z-index: 0; }
-  .cabinet-sim-base { z-index: 1; }
-  .cabinet-sim-overlay { z-index: 2; opacity: 1; transition: opacity 0.3s; }
-  .cabinet-sim-overlay.hidden { opacity: 0; }
+  
+  /* Layer order */
+  .cabinet-sim-skeleton { 
+    z-index: 1; 
+    opacity: 0.3;
+  }
+  
+  .cabinet-sim-base { 
+    z-index: 2; 
+    opacity: 0.8;
+  }
+  
+  .cabinet-sim-overlay { 
+    z-index: 3; 
+    opacity: 1; 
+    transition: opacity 0.5s ease;
+  }
+  
+  .cabinet-sim-overlay.hidden { 
+    opacity: 0; 
+  }
+  
+  /* Status legend */
+  .cabinet-legend {
+    text-align: center;
+    margin-top: 1rem;
+    color: var(--text-secondary);
+  }
+  
+  .cabinet-legend i {
+    margin: 0 0.5rem;
+  }
 </style>
-<div class="sidebar">
-  <h3 class="text-center mb-4"><i class="fa-solid fa-cube"></i> Smart Cabinet</h3>
-  <a href="#overview" class="active" id="nav-overview"><i class="fa-solid fa-chart-pie me-2"></i>Dashboard</a>
-  <a href="#employees" id="nav-employees"><i class="fa-solid fa-users me-2"></i>Employees</a>
-  <a href="#instruments" id="nav-instruments"><i class="fa-solid fa-toolbox me-2"></i>Instruments</a>
-  <a href="#logs" id="nav-logs"><i class="fa-solid fa-list-check me-2"></i>Access Logs</a>
-  <a href="#door" id="nav-door"><i class="fa-solid fa-door-open me-2"></i>Door Status</a>
+<div class="top-nav">
+  <div class="top-nav-content">
+    <a href="#" class="nav-brand"><i class="fa-solid fa-cube"></i> Smart Cabinet</a>
+    <div class="nav-links">
+      <a href="#overview" class="active" id="nav-overview"><i class="fa-solid fa-chart-pie me-2"></i>Dashboard</a>
+      <a href="#employees" id="nav-employees"><i class="fa-solid fa-users me-2"></i>Employees</a>
+      <a href="#instruments" id="nav-instruments"><i class="fa-solid fa-toolbox me-2"></i>Instruments</a>
+      <a href="#logs" id="nav-logs"><i class="fa-solid fa-list-check me-2"></i>Access Logs</a>
+      <a href="#door" id="nav-door"><i class="fa-solid fa-door-open me-2"></i>Door Status</a>
+    </div>
+  </div>
 </div>
 <div class="main-content">
   <!-- Overview Section -->
   <div id="overview-section">
     <h2 class="mb-4">Dashboard Overview</h2>
-    <div class="d-flex flex-wrap mb-4">
+    <div class="summary-cards-container">
       <div class="card summary-card text-center">
         <div class="card-body">
-          <i class="fa-solid fa-users fa-2x mb-2" style="color:var(--main-blue)"></i>
+          <i class="fa-solid fa-users fa-2x mb-2" style="color:var(--color-primary)"></i>
           <h5 class="card-title">Employees</h5>
           <h3 id="summary-employees">0</h3>
         </div>
       </div>
       <div class="card summary-card text-center">
         <div class="card-body">
-          <i class="fa-solid fa-toolbox fa-2x mb-2" style="color:var(--main-blue)"></i>
+          <i class="fa-solid fa-toolbox fa-2x mb-2" style="color:var(--color-primary)"></i>
           <h5 class="card-title">Instruments</h5>
           <h3 id="summary-instruments">0</h3>
         </div>
       </div>
       <div class="card summary-card text-center">
         <div class="card-body">
-          <i class="fa-solid fa-list-check fa-2x mb-2" style="color:var(--main-blue)"></i>
+          <i class="fa-solid fa-list-check fa-2x mb-2" style="color:var(--color-primary)"></i>
           <h5 class="card-title">Recent Accesses</h5>
           <h3 id="summary-logs">0</h3>
         </div>
       </div>
     </div>
-    <h4>Recent Access Logs</h4>
-    <div id="overview-recent-logs"></div>
-    <!-- Cabinet Layout Simulation (Overlay-based) -->
-    <div class="cabinet-sim-section mb-4" style="position: relative; max-width: 300px; margin: auto;">
-      <!-- Removed checkbox mechanism -->
-      <img src="{{ url_for('static', filename='place_holder/overlay0.png') }}" class="cabinet-sim-skeleton">
-      <img src="{{ url_for('static', filename='place_holder/overlay1.png') }}" class="cabinet-sim-base">
-      <img src="{{ url_for('static', filename='place_holder/overlay2.png') }}" class="cabinet-sim-overlay" id="sim-overlay-1">
-      <img src="{{ url_for('static', filename='place_holder/overlay3.png') }}" class="cabinet-sim-overlay" id="sim-overlay-2">
-      <img src="{{ url_for('static', filename='place_holder/overlay4.png') }}" class="cabinet-sim-overlay" id="sim-overlay-3">
-      <img src="{{ url_for('static', filename='place_holder/overlay5.png') }}" class="cabinet-sim-overlay" id="sim-overlay-4">
-      <img src="{{ url_for('static', filename='place_holder/overlay6.png') }}" class="cabinet-sim-overlay" id="sim-overlay-5">
+    
+    <div class="content-section">
+      <!-- Instruments Table -->
+      <h4>Instruments Status</h4>
+      <div id="dashboard-instruments-table"></div>
+    </div>
+    
+    <div class="content-section">
+      <!-- Cabinet Layout -->
+      <h4 class="text-center mb-4">Smart Cabinet - Real-time Status</h4>
+      <div class="cabinet-sim-section">
+        <div class="cabinet-container">
+          <!-- Cabinet images properly layered -->
+          <img src="{{ url_for('static', filename='place_holder/overlay0.png') }}" class="cabinet-sim-skeleton">
+          <img src="{{ url_for('static', filename='place_holder/overlay1.png') }}" class="cabinet-sim-base">
+          <img src="{{ url_for('static', filename='place_holder/overlay2.png') }}" class="cabinet-sim-overlay" id="sim-overlay-1">
+          <img src="{{ url_for('static', filename='place_holder/overlay3.png') }}" class="cabinet-sim-overlay" id="sim-overlay-2">
+          <img src="{{ url_for('static', filename='place_holder/overlay4.png') }}" class="cabinet-sim-overlay" id="sim-overlay-3">
+          <img src="{{ url_for('static', filename='place_holder/overlay5.png') }}" class="cabinet-sim-overlay" id="sim-overlay-4">
+          <img src="{{ url_for('static', filename='place_holder/overlay6.png') }}" class="cabinet-sim-overlay" id="sim-overlay-5">
+        </div>
+      </div>
+      <div class="cabinet-legend">
+        <i class="fa fa-circle text-success"></i>Available
+        <i class="fa fa-circle-o text-muted ms-3"></i>Taken
+      </div>
     </div>
   </div>
   <!-- Employees Section -->
@@ -233,23 +676,36 @@
   <!-- Instruments Section -->
   <div id="instruments-section" style="display:none;">
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <h2>Instruments</h2>
+      <h2>Instruments Management</h2>
       <button class="btn btn-main" onclick="showAddInstrumentForm()"><i class="fa fa-plus"></i> Add Instrument</button>
     </div>
-    <!-- Enhanced Cabinet Layout with Exact Shape Overlays -->
-    <div class="cabinet-enhanced-section mb-4" style="position: relative; max-width: 600px; margin: auto;">
-      <img src="{{ url_for('static', filename='place_holder/overlay1.png') }}" alt="Cabinet Layout" id="cabinet-bg" style="width: 100%; display: block; border-radius: 12px;">
-      <img src="{{ url_for('static', filename='place_holder/overlay2.png') }}" class="cabinet-overlay overlay2" id="overlay-2">
-      <img src="{{ url_for('static', filename='place_holder/overlay3.png') }}" class="cabinet-overlay overlay3" id="overlay-3">
-      <img src="{{ url_for('static', filename='place_holder/overlay4.png') }}" class="cabinet-overlay overlay4" id="overlay-4">
-      <img src="{{ url_for('static', filename='place_holder/overlay5.png') }}" class="cabinet-overlay overlay5" id="overlay-5">
-      <img src="{{ url_for('static', filename='place_holder/overlay6.png') }}" class="cabinet-overlay overlay6" id="overlay-6">
-    </div>
+    
     <div id="add-instrument-form" style="display:none; margin-bottom:1rem;">
       <input type="text" id="new-instrument-name" class="form-control d-inline-block w-auto" placeholder="Instrument Name">
       <button class="btn btn-main ms-2" onclick="addInstrument()">Save</button>
     </div>
-    <div id="instruments-table"></div>
+    
+    <!-- Instruments Table -->
+    <h4>Instruments List</h4>
+    <div id="instruments-table" class="mb-4"></div>
+    
+    <!-- Cabinet Layout for Instruments View -->
+    <h4 class="text-center mb-4">Smart Cabinet - Real-time Status</h4>
+    <div class="cabinet-sim-section">
+      <div class="cabinet-container">
+        <img src="{{ url_for('static', filename='place_holder/overlay0.png') }}" class="cabinet-sim-skeleton">
+        <img src="{{ url_for('static', filename='place_holder/overlay1.png') }}" class="cabinet-sim-base">
+        <img src="{{ url_for('static', filename='place_holder/overlay2.png') }}" class="cabinet-sim-overlay" id="instruments-overlay-1">
+        <img src="{{ url_for('static', filename='place_holder/overlay3.png') }}" class="cabinet-sim-overlay" id="instruments-overlay-2">
+        <img src="{{ url_for('static', filename='place_holder/overlay4.png') }}" class="cabinet-sim-overlay" id="instruments-overlay-3">
+        <img src="{{ url_for('static', filename='place_holder/overlay5.png') }}" class="cabinet-sim-overlay" id="instruments-overlay-4">
+        <img src="{{ url_for('static', filename='place_holder/overlay6.png') }}" class="cabinet-sim-overlay" id="instruments-overlay-5">
+      </div>
+    </div>
+    <div class="cabinet-legend">
+      <i class="fa fa-circle text-success"></i>Available
+      <i class="fa fa-circle-o text-muted ms-3"></i>Taken
+    </div>
   </div>
   <!-- Access Logs Section -->
   <div id="logs-section" style="display:none;">
@@ -262,12 +718,13 @@
         <option value="success">Success</option>
         <option value="failure">Failure</option>
         <option value="taken">Taken</option>
-        <option value="returned">Returned</option>
+        <option value="available">Returned</option>
       </select>
       <button class="btn btn-main" onclick="loadLogs()">Filter</button>
       <button class="btn btn-secondary" onclick="clearLogFilters()">Clear</button>
     </div>
-    <div id="logs-table"></div>
+    <!-- Enhanced Access Logs Table with Action column -->
+    <div id="logs-table" class="table-container"></div>
   </div>
   <!-- Door Status Section -->
   <div id="door-section" style="display:none;">
@@ -324,22 +781,24 @@ sections.forEach(sec => {
   });
 });
 
-// Overview summary and recent logs
+// Overview summary and instruments table
 function loadOverview() {
   fetch('/api/employees').then(r=>r.json()).then(data=>{
     document.getElementById('summary-employees').textContent = data.length;
   });
   fetch('/api/instruments').then(r=>r.json()).then(data=>{
     document.getElementById('summary-instruments').textContent = data.length;
+    // Load instruments table for dashboard
+    let html = '<div class="table-container"><table class="table table-striped"><thead><tr><th>ID</th><th>Name</th><th>Status</th></tr></thead><tbody>';
+    data.forEach(inst => {
+      let badge = inst.status === 'available' ? '<span class="badge bg-success badge-status">Available</span>' : '<span class="badge bg-danger badge-status">Taken</span>';
+      html += `<tr><td>${inst.id}</td><td>${inst.name}</td><td>${badge}</td></tr>`;
+    });
+    html += '</tbody></table></div>';
+    document.getElementById('dashboard-instruments-table').innerHTML = html;
   });
   fetch('/api/access-logs').then(r=>r.json()).then(data=>{
     document.getElementById('summary-logs').textContent = data.length;
-    let html = '<table class="table table-sm"><thead><tr><th>ID</th><th>Employee</th><th>Instrument</th><th>Status</th><th>Time</th></tr></thead><tbody>';
-    data.slice(0,5).forEach(log => {
-      html += `<tr><td>${log.id}</td><td>${log.name||''}</td><td>${log.instrument_name||''}</td><td>${log.status}</td><td>${log.timestamp}</td></tr>`;
-    });
-    html += '</tbody></table>';
-    document.getElementById('overview-recent-logs').innerHTML = html;
   });
 }
 
@@ -348,11 +807,11 @@ function loadEmployees() {
   fetch('/api/employees')
     .then(response => response.json())
     .then(data => {
-      let html = '<table class="table table-striped"><thead><tr><th>Fingerprint ID</th><th>Employee ID</th><th>Name</th></tr></thead><tbody>';
+      let html = '<div class="table-container"><table class="table table-striped"><thead><tr><th>Fingerprint ID</th><th>Employee ID</th><th>Name</th></tr></thead><tbody>';
       data.forEach(emp => {
         html += `<tr><td>${emp.fingerprint_ID}</td><td>${emp.employee_ID}</td><td>${emp.name}</td></tr>`;
       });
-      html += '</tbody></table>';
+      html += '</tbody></table></div>';
       document.getElementById('employees-table').innerHTML = html;
     });
 }
@@ -382,12 +841,12 @@ function loadInstruments() {
   fetch('/api/instruments')
     .then(response => response.json())
     .then(data => {
-      let html = '<table class="table table-striped"><thead><tr><th>ID</th><th>Name</th><th>Status</th></tr></thead><tbody>';
+      let html = '<div class="table-container"><table class="table table-striped"><thead><tr><th>ID</th><th>Name</th><th>Status</th></tr></thead><tbody>';
       data.forEach(inst => {
         let badge = inst.status === 'available' ? '<span class="badge bg-success badge-status">Available</span>' : '<span class="badge bg-danger badge-status">Taken</span>';
         html += `<tr><td>${inst.id}</td><td>${inst.name}</td><td>${badge}</td></tr>`;
       });
-      html += '</tbody></table>';
+      html += '</tbody></table></div>';
       document.getElementById('instruments-table').innerHTML = html;
     });
 }
@@ -413,7 +872,7 @@ function addInstrument() {
   });
 }
 
-// Access logs table
+// Access logs table with enhanced Action column
 function loadLogs() {
   const employee_ID = document.getElementById('filter-employee-id').value;
   const fingerprint_ID = document.getElementById('filter-fingerprint-id').value;
@@ -424,14 +883,31 @@ function loadLogs() {
   fetch(url)
     .then(response => response.json())
     .then(data => {
-      let html = '<table class="table table-striped"><thead><tr><th>ID</th><th>Fingerprint ID</th><th>Employee ID</th><th>Name</th><th>Status</th><th>Timestamp</th><th>Instrument ID</th><th>Instrument Name</th></tr></thead><tbody>';
+      let html = '<div class="table-container"><table class="table table-striped"><thead><tr><th>ID</th><th>Fingerprint ID</th><th>Employee ID</th><th>Name</th><th>Instrument</th><th>Action</th><th>Status</th><th>Timestamp</th></tr></thead><tbody>';
       data.forEach(log => {
         let badge = '';
-        if (log.status === 'available' || log.status === 'success' || log.status === 'returned') badge = '<span class="badge bg-success badge-status">' + log.status + '</span>';
-        else badge = '<span class="badge bg-danger badge-status">' + log.status + '</span>';
-        html += `<tr><td>${log.id}</td><td>${log.fingerprint_ID}</td><td>${log.employee_ID}</td><td>${log.name}</td><td>${badge}</td><td>${log.timestamp}</td><td>${log.instrument_id||''}</td><td>${log.instrument_name||''}</td></tr>`;
+        let action = '';
+        const instrumentName = log.instrument_name || `Instrument ${log.instrument_id || 'Unknown'}`;
+        
+        if (log.status === 'available') {
+          badge = '<span class="badge bg-success badge-status">Success</span>';
+          action = `<span class="text-success"><i class="fa fa-undo me-1"></i>${instrumentName} Returned</span>`;
+        } else if (log.status === 'taken') {
+          badge = '<span class="badge bg-warning badge-status">Taken</span>';
+          action = `<span class="text-warning"><i class="fa fa-hand-paper me-1"></i>${instrumentName} Removed</span>`;
+        } else if (log.status === 'success') {
+          badge = '<span class="badge bg-success badge-status">Success</span>';
+          action = '<span class="text-success"><i class="fa fa-check me-1"></i>Access Granted</span>';
+        } else if (log.status === 'failure') {
+          badge = '<span class="badge bg-danger badge-status">Failed</span>';
+          action = '<span class="text-danger"><i class="fa fa-times me-1"></i>Access Denied</span>';
+        } else {
+          badge = '<span class="badge bg-secondary badge-status">' + log.status + '</span>';
+          action = '<span class="text-muted"><i class="fa fa-question me-1"></i>Unknown Action</span>';
+        }
+        html += `<tr><td>${log.id}</td><td>${log.fingerprint_ID}</td><td>${log.employee_ID}</td><td>${log.name}</td><td>${log.instrument_name||'N/A'}</td><td>${action}</td><td>${badge}</td><td>${log.timestamp}</td></tr>`;
       });
-      html += '</tbody></table>';
+      html += '</tbody></table></div>';
       document.getElementById('logs-table').innerHTML = html;
     });
 }
@@ -512,5 +988,41 @@ function updateCabinetSimOverlays() {
 }
 updateCabinetSimOverlays();
 setInterval(updateCabinetSimOverlays, 2000);
+
+// Dashboard instruments table auto-refresh
+function updateDashboardInstrumentsTable() {
+  fetch('/api/instruments')
+    .then(response => response.json())
+    .then(data => {
+      let html = '<div class="table-container"><table class="table table-striped"><thead><tr><th>ID</th><th>Name</th><th>Status</th></tr></thead><tbody>';
+      data.forEach(inst => {
+        let badge = inst.status === 'available' ? '<span class="badge bg-success badge-status">Available</span>' : '<span class="badge bg-danger badge-status">Taken</span>';
+        html += `<tr><td>${inst.id}</td><td>${inst.name}</td><td>${badge}</td></tr>`;
+      });
+      html += '</tbody></table></div>';
+      document.getElementById('dashboard-instruments-table').innerHTML = html;
+    });
+}
+setInterval(updateDashboardInstrumentsTable, 2000);
+
+// Instruments view cabinet overlays update
+function updateInstrumentsCabinetOverlays() {
+  fetch('/api/instruments')
+    .then(response => response.json())
+    .then(data => {
+      // overlays 1-5 correspond to instruments 0-4
+      for (let i = 1; i <= 5; i++) {
+        const overlay = document.getElementById(`instruments-overlay-${i}`);
+        if (overlay && data[i-1]) {
+          if (data[i-1].status === 'available') {
+            overlay.classList.remove('hidden');
+          } else {
+            overlay.classList.add('hidden');
+          }
+        }
+      }
+    });
+}
+setInterval(updateInstrumentsCabinetOverlays, 2000);
 </script>
 {% endblock %} 
