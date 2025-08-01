@@ -8,6 +8,7 @@
 // Function prototypes
 void enrollFingerprint();
 void checkFingerprint();
+
 bool doEnroll(int id);
 
 // WiFi credentials
@@ -15,7 +16,7 @@ const char *ssid = "3ammektaher";
 const char *password = "Destro2204";
 
 // Flask server (replace with your computer's local IP)
-const char *server = "http://10.233.47.51:5050"; // <-- CHANGE THIS
+const char *server = "http://10.233.47.50:5050"; // <-- CHANGE THIS
 
 // Fingerprint sensor
 HardwareSerial serialPort(2); // use UART2
@@ -30,6 +31,8 @@ const int NUM_INSTRUMENTS = 2;
 const int sensorPins[NUM_INSTRUMENTS] = {12, 13};
 const int relayPins[NUM_INSTRUMENTS]  = {25, 26};
 const int buttonPins[NUM_INSTRUMENTS] = {32, 33};
+
+
 
 // Track instrument status
 String currentStatus[NUM_INSTRUMENTS] = {"available", "available"};
@@ -86,6 +89,8 @@ void setup() {
     digitalWrite(relayPins[i], HIGH);       // Locked by default
     pinMode(buttonPins[i], INPUT_PULLUP);   // Adjust as needed
   }
+  
+
 
   Serial.println("Type 'e' to enroll, 'c' to check fingerprint.");
 }
@@ -143,12 +148,44 @@ void notifyInstrumentReturn(int fingerprint_ID, int instrument_id) {
 }
 
 void loop() {
-  // Instrument management logic
+  // Instrument management logic with action selection
   for (int i = 0; i < NUM_INSTRUMENTS; i++) {
     if (digitalRead(buttonPins[i]) == LOW) { // Button pressed
       int fingerprint_ID = getFingerprintID();
       if (fingerprint_ID > 0) { // Only proceed if fingerprint is recognized
-        String newStatus = (currentStatus[i] == "available") ? "taken" : "available";
+        Serial.print("Found ID #"); Serial.println(fingerprint_ID);
+        Serial.print("Enter instrument number (1 or 2): ");
+        Serial.println(i+1);
+        
+        // Ask for action type
+        Serial.println("Select action: T for Take, R for Return");
+        Serial.println("T - Take instrument");
+        Serial.println("R - Return instrument");
+        
+        // Wait for user input (with timeout)
+        String action = "";
+        unsigned long startTime = millis();
+        while (action == "" && (millis() - startTime) < 5000) { // 5 second timeout
+          if (Serial.available()) {
+            char input = Serial.read();
+            if (input == 'T' || input == 't') {
+              action = "T";
+            } else if (input == 'R' || input == 'r') {
+              action = "R";
+            }
+          }
+          delay(100);
+        }
+        
+        // If no input received, auto-detect based on current status
+        if (action == "") {
+          action = (currentStatus[i] == "available") ? "T" : "R";
+          Serial.print("Auto-selected action: "); Serial.println(action);
+        }
+        
+        String newStatus = (action == "T") ? "taken" : "available";
+        Serial.print("Action selected: "); Serial.println(action);
+        Serial.print("New status: "); Serial.println(newStatus);
 
         // 1. Log access
         HTTPClient logHttp;
@@ -158,6 +195,7 @@ void loop() {
         String logPayload = "{\"fingerprint_ID\":" + String(fingerprint_ID) +
                             ",\"status\":\"" + newStatus + "\",\"instrument_id\":" + String(i+1) + "}";
         int logResponse = logHttp.POST(logPayload);
+        Serial.print("Logging access for instrument "); Serial.println(i+1);
         logHttp.end();
 
         // 2. Update instrument status
@@ -165,7 +203,7 @@ void loop() {
         String url = String(server) + "/api/instruments/" + String(i+1);
         http.begin(url);
         http.addHeader("Content-Type", "application/json");
-        String payload = "{\"status\":\"" + newStatus + "\"}";
+        String payload = "{\"status\":\"" + newStatus + "\",\"fingerprint_ID\":" + String(fingerprint_ID) + "}";
         int httpResponseCode = http.PUT(payload);
         Serial.print("PUT /api/instruments/"); Serial.print(i+1);
         Serial.print(" status: "); Serial.println(httpResponseCode);
@@ -173,10 +211,19 @@ void loop() {
         http.end();
 
         // 3. Update local status and provide feedback
-        currentStatus[i] = newStatus;
         if (httpResponseCode == 200) {
+          currentStatus[i] = newStatus;
           // Optionally, unlock/lock relay or provide success feedback
           digitalWrite(relayPins[i], (newStatus == "taken") ? LOW : HIGH);
+          Serial.println("Instrument status updated successfully");
+        } else if (httpResponseCode == 403) {
+          // Violation detected - deny access
+          digitalWrite(buzzerPin, HIGH);
+          delay(2000); // Longer buzz for violation
+          digitalWrite(buzzerPin, LOW);
+          Serial.println("Access denied: Violation detected");
+        } else {
+          Serial.println("Failed to update instrument status");
         }
         delay(500); // Debounce
       } else {
@@ -205,33 +252,6 @@ void loop() {
   } else if (mode == 0) {
     checkFingerprint();
     delay(1000);
-  }
-
-  // Logic for keypad buttons to toggle instrument status
-  for (int i = 0; i < NUM_INSTRUMENTS; i++) {
-    if (digitalRead(buttonPins[i]) == LOW) { // Button pressed
-      int fingerprint_ID = getFingerprintID();
-      if (fingerprint_ID > 0) { // Only proceed if fingerprint is recognized
-        String newStatus = (currentStatus[i] == "available") ? "taken" : "available";
-        HTTPClient http;
-        String url = String(server) + "/api/instruments/" + String(i+1);
-        http.begin(url);
-        http.addHeader("Content-Type", "application/json");
-        String payload = "{\"status\":\"" + newStatus + "\"}";
-        int httpResponseCode = http.PUT(payload);
-        Serial.print("PUT /api/instruments/"); Serial.print(i+1);
-        Serial.print(" status: "); Serial.println(httpResponseCode);
-        Serial.print("Response: "); Serial.println(http.getString());
-        http.end();
-        currentStatus[i] = newStatus;
-        delay(500); // Debounce
-      } else {
-        // Unregistered fingerprint: deny and buzz
-        digitalWrite(buzzerPin, HIGH);
-        delay(1000);
-        digitalWrite(buzzerPin, LOW);
-      }
-    }
   }
 }
 
@@ -315,6 +335,8 @@ bool doEnroll(int id) {
   }
 }
 
+
+
 void checkFingerprint() {
   Serial.println("Scan your finger...");
   uint8_t p = finger.getImage();
@@ -329,6 +351,56 @@ void checkFingerprint() {
     while (!Serial.available());
     int instrument_id = Serial.parseInt();
     Serial.print("Logging access for instrument "); Serial.println(instrument_id);
+
+    // Ask for action type
+    Serial.println("Select action: T for Take, R for Return");
+    Serial.println("T - Take instrument");
+    Serial.println("R - Return instrument");
+    
+    // Wait for user input (with timeout)
+    String action = "";
+    unsigned long startTime = millis();
+    while (action == "" && (millis() - startTime) < 5000) { // 5 second timeout
+      if (Serial.available()) {
+        char input = Serial.read();
+        if (input == 'T' || input == 't') {
+          action = "T";
+        } else if (input == 'R' || input == 'r') {
+          action = "R";
+        }
+      }
+      delay(100);
+    }
+    
+    // If no input received, auto-detect based on current status
+    if (action == "") {
+      // Fetch current status from backend to determine action
+      HTTPClient getHttp;
+      String getUrl = String(server) + "/api/instruments";
+      getHttp.begin(getUrl);
+      int getResponse = getHttp.GET();
+      String getPayload = getHttp.getString();
+      getHttp.end();
+      
+      if (getResponse == 200) {
+        DynamicJsonDocument doc(1024);
+        DeserializationError error = deserializeJson(doc, getPayload);
+        if (!error) {
+          for (JsonObject inst : doc.as<JsonArray>()) {
+            if (inst["id"] == instrument_id) {
+              String currentStatus = inst["status"].as<String>();
+              action = (currentStatus == "available") ? "T" : "R";
+              break;
+            }
+          }
+        }
+      }
+      Serial.print("Auto-selected action: "); Serial.println(action);
+    }
+    
+    String newStatus = (action == "T") ? "taken" : "available";
+    Serial.print("Action selected: "); Serial.println(action);
+    Serial.print("New status: "); Serial.println(newStatus);
 
     // Verify with Flask API
     HTTPClient http;
@@ -356,32 +428,6 @@ void checkFingerprint() {
       doorHttp.POST(doorPayload);
       doorHttp.end();
 
-      // Fetch current status from backend to determine action
-      HTTPClient getHttp;
-      String getUrl = String(server) + "/api/instruments";
-      getHttp.begin(getUrl);
-      int getResponse = getHttp.GET();
-      String getPayload = getHttp.getString();
-      getHttp.end();
-      String newStatus = "taken";
-      if (getResponse == 200) {
-          DynamicJsonDocument doc(1024);
-          DeserializationError error = deserializeJson(doc, getPayload);
-          if (!error) {
-              for (JsonObject inst : doc.as<JsonArray>()) {
-                  if (inst["id"] == instrument_id) {
-                      String currentStatus = inst["status"].as<String>();
-                      if (currentStatus == "taken") {
-                          newStatus = "available";
-                      } else {
-                          newStatus = "taken";
-                      }
-                      break;
-                  }
-              }
-          }
-      }
-
       // Log the actual instrument action (taken/available)
       http.begin(String(server) + "/api/access-log");
       http.addHeader("Content-Type", "application/json");
@@ -389,12 +435,12 @@ void checkFingerprint() {
       http.POST(payload);
       http.end();
 
-      // Update instrument status
+      // Update instrument status with fingerprint_ID
       HTTPClient putHttp;
-      String url = String(server) + "/api/instruments/" + String(instrument_id);
-      putHttp.begin(url);
+      String putUrl = String(server) + "/api/instruments/" + String(instrument_id);
+      putHttp.begin(putUrl);
       putHttp.addHeader("Content-Type", "application/json");
-      String putPayload = "{\"status\":\"" + newStatus + "\"}";
+      String putPayload = "{\"status\":\"" + newStatus + "\",\"fingerprint_ID\":" + String(finger.fingerID) + "}";
       int putResponse = putHttp.PUT(putPayload);
       Serial.print("PUT /api/instruments/"); Serial.print(instrument_id);
       Serial.print(" status: "); Serial.println(putResponse);
@@ -415,21 +461,11 @@ void checkFingerprint() {
       doorHttp2.end();
     } else {
       Serial.println("Access Denied!");
-      // Log the access denial
-      http.begin(String(server) + "/api/access-log");
-      http.addHeader("Content-Type", "application/json");
-      payload = "{\"fingerprint_ID\":" + String(finger.fingerID) + ",\"status\":\"failure\",\"instrument_id\":" + String(instrument_id) + "}";
-      http.POST(payload);
-      http.end();
-      
       digitalWrite(buzzerPin, HIGH);
       delay(1000);
       digitalWrite(buzzerPin, LOW);
     }
-  } else if (p == FINGERPRINT_NOTFOUND) {
+  } else {
     Serial.println("No match found.");
-    digitalWrite(buzzerPin, HIGH);
-    delay(1000);
-    digitalWrite(buzzerPin, LOW);
   }
 } 

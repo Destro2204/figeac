@@ -19,21 +19,69 @@ door_status = "closed"
 access_log_clients = []
 # Global list of queues for vision alert SSE clients
 vision_alert_clients = []
+# Global list of queues for violation alert SSE clients
+violation_alert_clients = []
 # Global variable to store the latest frame for MJPEG streaming
 latest_frame = None
 latest_frame_lock = Lock()
+
+def get_employee_taken_instruments(fingerprint_ID):
+    """Get all instruments currently taken by an employee"""
+    return EmployeeInstrument.query.filter_by(fingerprint_ID=fingerprint_ID).all()
+
+def check_instrument_violation(fingerprint_ID, instrument_id, action):
+    """
+    Check if employee is violating the one-instrument rule
+    Returns: (is_violation, violation_message, taken_instruments)
+    """
+    employee = Employee.query.filter_by(fingerprint_ID=fingerprint_ID).first()
+    if not employee:
+        return False, "Employee not found", []
+    
+    taken_instruments = get_employee_taken_instruments(fingerprint_ID)
+    
+    if action == "take":
+        # Check if employee already has instruments
+        if len(taken_instruments) >= 1:
+            instrument_names = [inst.instrument.name for inst in taken_instruments]
+            violation_msg = f"Employee {employee.name} ({employee.employee_ID}) attempted to take instrument {instrument_id} but already has: {', '.join(instrument_names)}"
+            return True, violation_msg, taken_instruments
+    elif action == "return":
+        # Check if employee is returning an instrument they don't have
+        has_instrument = any(inst.instrument_id == instrument_id for inst in taken_instruments)
+        if not has_instrument:
+            violation_msg = f"Employee {employee.name} ({employee.employee_ID}) attempted to return instrument {instrument_id} but doesn't have it"
+            return True, violation_msg, taken_instruments
+    
+    return False, "", taken_instruments
+
+def send_violation_alert(violation_message, employee_name, employee_ID, instrument_names):
+    """Send violation alert to admin dashboard"""
+    alert_data = {
+        'type': 'violation',
+        'message': violation_message,
+        'employee_name': employee_name,
+        'employee_ID': employee_ID,
+        'instrument_names': instrument_names,
+        'timestamp': datetime.utcnow().isoformat()
+    }
+    for client in violation_alert_clients:
+        client.put(json.dumps(alert_data))
 
 class Employee(db.Model):
     fingerprint_ID = db.Column(db.Integer, primary_key=True)
     employee_ID = db.Column(db.String(80), unique=True, nullable=False)
     name = db.Column(db.String(120), nullable=False)
+    role = db.Column(db.String(20), nullable=False, default='operator')  # 'operator' or 'supervisor'
     access_logs = db.relationship('AccessLog', backref='employee', lazy=True)
+    taken_instruments = db.relationship('EmployeeInstrument', backref='employee', lazy=True)
 
 class Instrument(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
     status = db.Column(db.String(20), nullable=False)  # "available" or "taken"
     access_logs = db.relationship('AccessLog', backref='instrument', lazy=True)
+    employee_assignments = db.relationship('EmployeeInstrument', backref='instrument', lazy=True)
 
 class AccessLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -41,6 +89,15 @@ class AccessLog(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     status = db.Column(db.String(20), nullable=False)
     instrument_id = db.Column(db.Integer, db.ForeignKey('instrument.id'))  # NEW COLUMN
+    action = db.Column(db.String(100), nullable=True)  # NEW COLUMN for detailed action description
+
+class EmployeeInstrument(db.Model):
+    """Track which instruments each employee has taken"""
+    id = db.Column(db.Integer, primary_key=True)
+    fingerprint_ID = db.Column(db.Integer, db.ForeignKey('employee.fingerprint_ID'), nullable=False)
+    instrument_id = db.Column(db.Integer, db.ForeignKey('instrument.id'), nullable=False)
+    taken_at = db.Column(db.DateTime, default=datetime.utcnow)
+    __table_args__ = (db.UniqueConstraint('fingerprint_ID', 'instrument_id', name='unique_employee_instrument'),)
 
 class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -50,8 +107,11 @@ class Admin(db.Model):
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    if 'admin_logged_in' in session and session['admin_logged_in']:
-        return render_template("home.html")
+    # Check if already logged in
+    if ('admin_logged_in' in session and session['admin_logged_in']) or \
+       ('employee_logged_in' in session and session['employee_logged_in']):
+        return redirect(url_for('dashboard'))
+    
     if request.method == "POST":
         username = request.form.get('username')
         password = request.form.get('password')
@@ -65,8 +125,17 @@ def home():
 
 @app.route("/logout")
 def logout():
+    # Clear all session data
     session.pop('admin_logged_in', None)
+    session.pop('employee_logged_in', None)
+    session.pop('employee_id', None)
+    session.pop('employee_role', None)
     return redirect(url_for('home'))
+
+@app.route("/employee-login")
+def employee_login_page():
+    """Employee login page"""
+    return render_template("employee_login.html")
 
 @app.route("/about")
 def about():
@@ -76,8 +145,17 @@ def about():
 
 @app.route('/dashboard')
 def dashboard():
-    if 'admin_logged_in' not in session or not session['admin_logged_in']:
+    # Check for admin authentication only
+    if not ('admin_logged_in' in session and session['admin_logged_in']):
         return redirect(url_for('home'))
+    
+    # Get user info for display
+    user_info = {
+        'name': 'Administrator',
+        'role': 'admin',
+        'type': 'admin'
+    }
+    
     logs = AccessLog.query.order_by(AccessLog.timestamp.desc()).all()
     log_data = []
     for log in logs:
@@ -92,7 +170,24 @@ def dashboard():
             'instrument_id': instrument.id if instrument else None,
             'instrument_name': instrument.name if instrument else None
         })
-    return render_template('dashboard.html', logs=log_data)
+    return render_template('dashboard.html', logs=log_data, user_info=user_info)
+
+@app.route('/employee-dashboard')
+def employee_dashboard():
+    # Check for employee authentication
+    if not ('employee_logged_in' in session and session['employee_logged_in']):
+        return redirect(url_for('employee_login_page'))
+    
+    # Get user info for display
+    user_info = None
+    if session.get('employee_role') == 'supervisor':
+        user_info = {'name': 'Factory Supervisor', 'role': 'supervisor'}
+    else:
+        employee = Employee.query.filter_by(fingerprint_ID=session.get('employee_id')).first()
+        if employee:
+            user_info = {'name': employee.name, 'role': employee.role}
+    
+    return render_template('dashboard_employee.html', user_info=user_info)
  
 
 @app.route('/api/verify', methods=['POST'])
@@ -108,12 +203,64 @@ def verify_fingerprint():
             'employee': {
                 'fingerprint_ID': employee.fingerprint_ID,
                 'employee_ID': employee.employee_ID,
-                'name': employee.name
+                'name': employee.name,
+                'role': employee.role
             },
             'access': 'allowed'
         })
     else:
         return jsonify({'status': 'failure', 'access': 'denied'}), 404
+
+
+
+@app.route('/api/employee-login', methods=['POST'])
+def employee_login():
+    """Employee login via username/password"""
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+    
+    if not username or not password:
+        return jsonify({'status': 'failure', 'message': 'Username and password are required'}), 400
+    
+    # Check for supervisor login
+    if username == 'supervisor' and password == 'supervisor':
+        # Create a supervisor session
+        session['employee_logged_in'] = True
+        session['employee_id'] = 'supervisor'
+        session['employee_role'] = 'supervisor'
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Login successful',
+            'employee': {
+                'fingerprint_ID': 'supervisor',
+                'employee_ID': 'SUP001',
+                'name': 'Factory Supervisor',
+                'role': 'supervisor'
+            }
+        })
+    
+    # Check for operator login (username = name, password = employee_ID)
+    employee = Employee.query.filter_by(name=username, employee_ID=password).first()
+    if employee:
+        # Set session for employee
+        session['employee_logged_in'] = True
+        session['employee_id'] = employee.fingerprint_ID
+        session['employee_role'] = employee.role
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Login successful',
+            'employee': {
+                'fingerprint_ID': employee.fingerprint_ID,
+                'employee_ID': employee.employee_ID,
+                'name': employee.name,
+                'role': employee.role
+            }
+        })
+    
+    return jsonify({'status': 'failure', 'message': 'Invalid credentials'}), 401
 
 
 @app.route('/api/access-log', methods=['POST'])
@@ -177,7 +324,8 @@ def get_access_logs():
             'timestamp': log.timestamp.isoformat(),
             'status': log.status,
             'instrument_id': instrument.id if instrument else None,
-            'instrument_name': instrument.name if instrument else None
+            'instrument_name': instrument.name if instrument else None,
+            'action': log.action if log.action else f"{'Access Granted' if log.status == 'success' else 'Access Denied'}"
         })
     return jsonify(result)
 
@@ -190,7 +338,8 @@ def get_employees():
         result.append({
             'fingerprint_ID': emp.fingerprint_ID,
             'employee_ID': emp.employee_ID,
-            'name': emp.name
+            'name': emp.name,
+            'role': emp.role
         })
     return jsonify(result)
 
@@ -201,12 +350,20 @@ def add_employee():
     fingerprint_ID = data.get('fingerprint_ID')
     employee_ID = data.get('employee_ID')
     name = data.get('name')
+    role = data.get('role', 'operator')  # Default to operator if not specified
+    
     if not all([fingerprint_ID, employee_ID, name]):
         return jsonify({'status': 'failure', 'message': 'fingerprint_ID, employee_ID, and name are required'}), 400
+    
+    # Validate role
+    if role not in ['operator', 'supervisor']:
+        return jsonify({'status': 'failure', 'message': 'Role must be either "operator" or "supervisor"'}), 400
+    
     # Check for duplicate fingerprint_ID or employee_ID
     if Employee.query.filter_by(fingerprint_ID=fingerprint_ID).first() or Employee.query.filter_by(employee_ID=employee_ID).first():
         return jsonify({'status': 'failure', 'message': 'Employee with this fingerprint_ID or employee_ID already exists'}), 409
-    new_employee = Employee(fingerprint_ID=fingerprint_ID, employee_ID=employee_ID, name=name)
+    
+    new_employee = Employee(fingerprint_ID=fingerprint_ID, employee_ID=employee_ID, name=name, role=role)
     db.session.add(new_employee)
     db.session.commit()
     return jsonify({'status': 'success', 'message': 'Employee added'})
@@ -230,13 +387,23 @@ def update_employee(fingerprint_ID):
         return jsonify({'status': 'failure', 'message': 'Employee not found'}), 404
     new_employee_ID = data.get('employee_ID')
     new_name = data.get('name')
+    new_role = data.get('role')
+    
     if not new_employee_ID or not new_name:
         return jsonify({'status': 'failure', 'message': 'employee_ID and name are required'}), 400
+    
+    # Validate role if provided
+    if new_role and new_role not in ['operator', 'supervisor']:
+        return jsonify({'status': 'failure', 'message': 'Role must be either "operator" or "supervisor"'}), 400
+    
     # Check for duplicate employee_ID (but allow if it's the same as current)
     if new_employee_ID != employee.employee_ID and Employee.query.filter_by(employee_ID=new_employee_ID).first():
         return jsonify({'status': 'failure', 'message': 'Another employee with this employee_ID already exists'}), 409
+    
     employee.employee_ID = new_employee_ID
     employee.name = new_name
+    if new_role:
+        employee.role = new_role
     db.session.commit()
     return jsonify({'status': 'success', 'message': 'Employee updated'})
 
@@ -356,6 +523,16 @@ def sse_vision_alert():
     vision_alert_clients.append(q)
     return Response(stream_with_context(event_stream(q)), mimetype="text/event-stream")
 
+@app.route('/events/violation-alert')
+def sse_violation_alert():
+    def event_stream(q):
+        while True:
+            alert = q.get()
+            yield f"data: {alert}\n\n"
+    q = queue.Queue()
+    violation_alert_clients.append(q)
+    return Response(stream_with_context(event_stream(q)), mimetype="text/event-stream")
+
 @app.route('/api/instruments', methods=['GET'])
 def get_instruments():
     instruments = Instrument.query.all()
@@ -386,14 +563,86 @@ def update_instrument(instrument_id):
     instrument = Instrument.query.filter_by(id=instrument_id).first()
     if not instrument:
         return jsonify({'status': 'failure', 'message': 'Instrument not found'}), 404
-    name = data.get('name')
-    status = data.get('status')
-    if name:
-        instrument.name = name
-    if status:
-        instrument.status = status
+    
+    fingerprint_ID = data.get('fingerprint_ID')
+    new_status = data.get('status')
+    action = data.get('action', 'take' if new_status == 'taken' else 'return')
+    
+    if not fingerprint_ID:
+        return jsonify({'status': 'failure', 'message': 'fingerprint_ID is required'}), 400
+    
+    # Check for violations
+    is_violation, violation_message, taken_instruments = check_instrument_violation(fingerprint_ID, instrument_id, action)
+    
+    if is_violation:
+        # Log the violation
+        employee = Employee.query.filter_by(fingerprint_ID=fingerprint_ID).first()
+        access_log = AccessLog(
+            fingerprint_ID=fingerprint_ID,
+            status='denied',
+            instrument_id=instrument_id,
+            action=violation_message
+        )
+        db.session.add(access_log)
+        db.session.commit()
+        
+        # Send violation alert
+        instrument_names = [inst.instrument.name for inst in taken_instruments]
+        send_violation_alert(
+            violation_message,
+            employee.name if employee else "Unknown",
+            employee.employee_ID if employee else "Unknown",
+            instrument_names
+        )
+        
+        return jsonify({
+            'status': 'denied',
+            'message': violation_message,
+            'current_instruments': instrument_names
+        }), 403
+    
+    # If no violation, proceed with normal update
+    if new_status:
+        instrument.status = new_status
+        
+        # Update EmployeeInstrument tracking
+        if new_status == 'taken':
+            # Add to tracking
+            existing = EmployeeInstrument.query.filter_by(
+                fingerprint_ID=fingerprint_ID,
+                instrument_id=instrument_id
+            ).first()
+            if not existing:
+                employee_instrument = EmployeeInstrument(
+                    fingerprint_ID=fingerprint_ID,
+                    instrument_id=instrument_id
+                )
+                db.session.add(employee_instrument)
+        elif new_status == 'available':
+            # Remove from tracking
+            EmployeeInstrument.query.filter_by(
+                fingerprint_ID=fingerprint_ID,
+                instrument_id=instrument_id
+            ).delete()
+    
     db.session.commit()
-    return jsonify({'status': 'success', 'message': 'Instrument updated'})
+    
+    # Log the successful action
+    action_description = f"Instrument {instrument.name} {'taken' if new_status == 'taken' else 'returned'}"
+    access_log = AccessLog(
+        fingerprint_ID=fingerprint_ID,
+        status='success',
+        instrument_id=instrument_id,
+        action=action_description
+    )
+    db.session.add(access_log)
+    db.session.commit()
+    
+    return jsonify({
+        'status': 'success',
+        'message': f'Instrument {instrument.name} {new_status}',
+        'instrument_status': new_status
+    })
 
 
 if __name__ == "__main__":
