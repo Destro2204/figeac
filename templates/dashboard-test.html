@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Cabinet Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* Dark theme with high contrast for factory environments */
+            --bg-primary: #0a0a0b;
+            --bg-secondary: #1a1a1d;
+            --bg-card: #252529;
+            --bg-sidebar: #141416;
+            --bg-hover: #2d2d32;
+            --bg-active: #3a3a40;
+            
+            /* High contrast text colors */
+            --text-primary: #ffffff;
+            --text-secondary: #e0e0e0;
+            --text-muted: #a0a0a0;
+            
+            /* Status colors with high contrast */
+            --color-success: #00ff88;
+            --color-warning: #ffaa00;
+            --color-danger: #ff4444;
+            --color-info: #00aaff;
+            
+            /* Interactive elements */
+            --color-primary: #0066ff;
+            --color-primary-hover: #0052cc;
+            --border-color: #404044;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            outline: 0;
+            appearance: none;
+            text-decoration: none;
+            list-style: none;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+        }
+        
+        body { 
+            width: 100vw;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            user-select: none;
+            overflow-x: hidden;
+        }
+        
+        /* Top navigation bar */
+        .top-nav {
+            width: 100%;
+            background: var(--bg-sidebar);
+            color: var(--text-primary);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            border-bottom: 2px solid var(--border-color);
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }
+        
+        .top-nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .nav-brand {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-brand i {
+            margin-right: 0.5rem;
+            font-size: 1.6rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav-links a {
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.2rem;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            min-height: 48px;
+        }
+        
+        .nav-links a i {
+            font-size: 1.1rem;
+            margin-right: 0.5rem;
+        }
+        
+        .nav-links a.active {
+            background: var(--bg-active);
+            color: var(--text-primary);
+            border-color: var(--color-primary);
+        }
+        
+        .nav-links a:hover {
+            background: var(--bg-hover);
+            color: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .user-name {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        .user-role {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        /* Main content */
+        .main-content {
+            margin-top: 80px;
+            padding: 2rem;
+            min-height: calc(100vh - 80px);
+            background: var(--bg-secondary);
+            width: 100%;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Summary cards container - fixed grid layout */
+        .summary-cards-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .summary-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            transition: all 0.3s ease;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--shadow-color);
+            border-color: var(--color-primary);
+        }
+        
+        .summary-card h5 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin: 1rem 0 0.5rem 0;
+        }
+        
+        .summary-card h3 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .summary-card i {
+            font-size: 2.5rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        /* Cabinet columns layout */
+        .cabinet-columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .cabinet-column {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            overflow: hidden;
+        }
+        
+        .cabinet-header {
+            background: var(--bg-active);
+            padding: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .cabinet-header h5 {
+            margin: 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        
+        .cabinet-header i {
+            margin-right: 0.5rem;
+        }
+        
+        .cabinet-body {
+            padding: 1.5rem;
+        }
+        
+        /* Cabinet instruments table */
+        .instruments-section h6 {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        
+        .table-container {
+            max-height: 200px;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+        
+        .table {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            margin: 0;
+        }
+        
+        .table th {
+            background: var(--color-primary);
+            color: #ffffff;
+            font-weight: 700;
+            padding: 0.75rem;
+            border: none;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .table td {
+            padding: 0.75rem;
+            border: none;
+            color: var(--text-primary);
+            font-weight: 500;
+            background: var(--bg-card);
+        }
+        
+        .table-striped>tbody>tr:nth-of-type(odd) td {
+            background: var(--bg-secondary);
+        }
+        
+        .table-striped>tbody>tr:nth-of-type(even) td {
+            background: var(--bg-card);
+        }
+        
+        .table-striped>tbody>tr:hover td {
+            background: var(--bg-active) !important;
+            color: #ffffff !important;
+        }
+        
+        /* Cabinet layout visualization */
+        .cabinet-layout {
+            text-align: center;
+        }
+        
+        .cabinet-sim-section {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+        
+        .cabinet-container {
+            position: relative;
+            width: 80%;
+            height: 80%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .cabinet-sim-skeleton,
+        .cabinet-sim-base,
+        .cabinet-sim-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 100%;
+            max-height: 100%;
+            height: auto;
+            width: auto;
+            display: block;
+            pointer-events: none;
+        }
+        
+        .cabinet-sim-skeleton { 
+            z-index: 1; 
+            opacity: 0.3;
+        }
+        
+        .cabinet-sim-base { 
+            z-index: 2; 
+            opacity: 0.8;
+        }
+        
+        .cabinet-sim-overlay { 
+            z-index: 3; 
+            opacity: 1; 
+            transition: opacity 0.5s ease;
+        }
+        
+        .cabinet-sim-overlay.hidden { 
+            opacity: 0; 
+        }
+        
+        .cabinet-legend {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .cabinet-legend i {
+            margin: 0 0.3rem;
+        }
+        
+        /* Badge improvements */
+        .badge-status {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .bg-success {
+            background-color: var(--color-success) !important;
+            color: #000000 !important;
+            font-weight: 700 !important;
+        }
+        
+        .bg-danger {
+            background-color: var(--color-danger) !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+        
+        .bg-warning {
+            background-color: var(--color-warning) !important;
+            color: #000000 !important;
+            font-weight: 700 !important;
+        }
+        
+        .bg-info {
+            background-color: var(--color-info) !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+        
+        /* Alert styling */
+        .alert {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            padding: 1rem;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-info {
+            border-color: var(--color-info);
+            background: rgba(0, 170, 255, 0.1);
+        }
+        
+        /* Typography improvements */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text-primary);
+            font-weight: 600;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+        
+        h2 { 
+            font-size: 2rem; 
+            margin-bottom: 2rem; 
+        }
+        
+        /* Responsive design */
+        @media (max-width: 1200px) {
+            .summary-cards-container,
+            .cabinet-columns {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .summary-cards-container,
+            .cabinet-columns {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .top-nav-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+        
+        /* Section visibility */
+        .content-section {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .content-section.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        /* Button styling */
+        .btn {
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            min-height: 48px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-main {
+            background: var(--color-primary);
+            color: #fff;
+            border: none;
+        }
+        
+        .btn-main:hover {
+            background: var(--color-primary-hover);
+            color: #fff;
+        }
+        
+        .btn-secondary {
+            background: var(--bg-active);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+        
+        /* Form controls */
+        .form-control, .form-select {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            padding: 0.75rem 1rem;
+            min-height: 48px;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background: var(--bg-card);
+            border-color: var(--color-primary);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <div class="top-nav">
+        <div class="top-nav-content">
+            <a href="#" class="nav-brand">
+                <i class="fa-solid fa-cube"></i> Smart Cabinet
+            </a>
+            
+            <div class="nav-links">
+                <a href="#overview" class="active" id="nav-overview">
+                    <i class="fa-solid fa-chart-pie"></i>Dashboard
+                </a>
+                <a href="#employees" id="nav-employees">
+                    <i class="fa-solid fa-users"></i>Employees
+                </a>
+                <a href="#instruments" id="nav-instruments">
+                    <i class="fa-solid fa-toolbox"></i>Instruments
+                </a>
+                <a href="#logs" id="nav-logs">
+                    <i class="fa-solid fa-list-check"></i>Access Logs
+                </a>
+                <a href="#door" id="nav-door">
+                    <i class="fa-solid fa-door-open"></i>Door Status
+                </a>
+            </div>
+            
+            <div class="user-info">
+                <span class="user-name">John Smith</span>
+                <span class="user-role badge bg-danger">Admin</span>
+                <a href="/logout" class="btn btn-sm btn-outline-light ms-2">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Overview Section -->
+        <div id="overview-section" class="content-section active">
+            <h2>Dashboard Overview</h2>
+            
+            <!-- Summary Cards -->
+            <div class="summary-cards-container">
+                <div class="summary-card">
+                    <i class="fa-solid fa-users fa-2x" style="color:var(--color-primary)"></i>
+                    <h5>Employees</h5>
+                    <h3 id="summary-employees">4</h3>
+                </div>
+                <div class="summary-card">
+                    <i class="fa-solid fa-toolbox fa-2x" style="color:var(--color-primary)"></i>
+                    <h5>Total Instruments</h5>
+                    <h3 id="summary-instruments">5</h3>
+                </div>
+                <div class="summary-card">
+                    <i class="fa-solid fa-list-check fa-2x" style="color:var(--color-primary)"></i>
+                    <h5>Recent Accesses</h5>
+                    <h3 id="summary-logs">53</h3>
+                </div>
+                <div class="summary-card">
+                    <i class="fa-solid fa-cube fa-2x" style="color:var(--color-success)"></i>
+                    <h5>Cabinet 1</h5>
+                    <h3 id="summary-cabinet1">4/5</h3>
+                </div>
+                <div class="summary-card">
+                    <i class="fa-solid fa-cube fa-2x" style="color:var(--color-warning)"></i>
+                    <h5>Cabinet 2</h5>
+                    <h3 id="summary-cabinet2">5/5</h3>
+                </div>
+                <div class="summary-card">
+                    <i class="fa-solid fa-cube fa-2x" style="color:var(--color-info)"></i>
+                    <h5>Cabinet 3</h5>
+                    <h3 id="summary-cabinet3">5/5</h3>
+                </div>
+            </div>
+            
+            <!-- Cabinet Columns -->
+            <div class="cabinet-columns">
+                <!-- Cabinet 1 -->
+                <div class="cabinet-column">
+                    <div class="cabinet-header">
+                        <h5><i class="fa-solid fa-cube text-success"></i>Cabinet 1 - Active</h5>
+                    </div>
+                    <div class="cabinet-body">
+                        <div class="instruments-section">
+                            <h6>Instruments Status</h6>
+                            <div class="table-container">
+                                <table class="table table-striped table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Drill A</td>
+                                            <td><span class="badge bg-success badge-status">Available</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>Hammer B</td>
+                                            <td><span class="badge bg-danger badge-status">Taken</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>Wrench C</td>
+                                            <td><span class="badge bg-success badge-status">Available</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>4</td>
+                                            <td>Screwdriver D</td>
+                                            <td><span class="badge bg-success badge-status">Available</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>5</td>
+                                            <td>Pliers E</td>
+                                            <td><span class="badge bg-success badge-status">Available</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="cabinet-layout">
+                            <h6>Cabinet Layout</h6>
+                            <div class="cabinet-sim-section">
+                                <div class="cabinet-container">
+                                    <!-- Simulated cabinet visualization -->
+                                    <div style="width: 150px; height: 200px; background: linear-gradient(145deg, #2a2a2a, #1a1a1a); border-radius: 8px; border: 2px solid var(--border-color); position: relative; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
+                                        <!-- Simulated instrument slots -->
+                                        <div style="position: absolute; top: 20px; left: 20px; width: 25px; height: 25px; background: var(--color-success); border-radius: 50%; box-shadow: 0 0 10px var(--color-success);"></div>
+                                        <div style="position: absolute; top: 20px; right: 20px; width: 25px; height: 25px; background: var(--color-danger); border-radius: 50%; box-shadow: 0 0 10px var(--color-danger);"></div>
+                                        <div style="position: absolute; top: 70px; left: 20px; width: 25px; height: 25px; background: var(--color-success); border-radius: 50%; box-shadow: 0 0 10px var(--color-success);"></div>
+                                        <div style="position: absolute; top: 70px; right: 20px; width: 25px; height: 25px; background: var(--color-success); border-radius: 50%; box-shadow: 0 0 10px var(--color-success);"></div>
+                                        <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 25px; height: 25px; background: var(--color-success); border-radius: 50%; box-shadow: 0 0 10px var(--color-success);"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cabinet-legend">
+                                <i class="fa fa-circle text-success"></i>Available
+                                <i class="fa fa-circle text-danger ms-3"></i>Taken
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Cabinet 2 -->
+                <div class="cabinet-column">
+                    <div class="cabinet-header">
+                        <h5><i class="fa-solid fa-cube text-warning"></i>Cabinet 2 - Coming Soon</h5>
+                    </div>
+                    <div class="cabinet-body">
+                        <div class="instruments-section">
+                            <h6>Instruments Status</h6>
+                            <div class="alert alert-info">
+                                <i class="fa-solid fa-info-circle me-2"></i>
+                                Cabinet 2 is not yet connected. Default instruments shown.
+                            </div>
+                            <div class="table-container">
+                                <table class="table table-striped table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Drill Bit A</td>
+                                            <td><span class="badge bg-success badge-status">Available</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>Screwdriver B</td>
+                                            <td><span class="badge bg-success badge-status">Available</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>Wrench C</td>
+                                            <td><span class="badge bg-success badge-status">Available</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>4</td>
+                                            <td>Hammer D</td>
+                                            <td><span class="badge bg-success badge-status">Available</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>5</td>
+                                            <td>Pliers E</td>
+                                            <td><span class="badge bg-success badge-status">Available</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="cabinet-layout">
+                            <h6>Cabinet Layout</h6>
+                            <div class="cabinet-sim-section">
+                                <div class="cabinet-container">
+                                    <div style="width: 150px; height: 200px; background: linear-gradient(145deg, #2a2a2a, #1a1a1a); border-radius: 8px; border: 2px solid var(--border-color); position: relative; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
+                                        <div style="position: absolute; top: 20px; left: 20px; width: 25px; height: 25px; background: var(--color-success); border-radius: 50%; box-shadow: 0 0 10px var(--color-success);"></div>
+                                        <div style="position: absolute; top: 20px; right: 20px; width: 25px; height: 25px; background: var(--color-success); border-radius: 50%; box-shadow: 0 0 10px var(--color-success);"></div>
+                                        <div style="position: absolute; top: 70px; left: 20px; width: 25px; height: 25px; background: var(--color-success); border-radius: 50%; box-shadow: 0 0 10px var(--color-success);"></div>
+                                        <div style="position: absolute; top: 70px; right: 20px; width: 25px; height: 25px; background: var(--color-success); border-radius: 50%; box-shadow: 0 0 10px var(--color-success);"></div>
+                                        <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 25px; height: 25px; background: var(--color-success); border-radius: 50%; box-shadow: 0 0 10px var(--color-success);"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cabinet-legend">
+                                <i class="fa fa-circle text-success"></i>Available
+                                <i class="fa fa-circle text-danger ms-3"></i>Taken
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Cabinet 3 -->
+                <div class="cabinet-column">
+                    <div class="cabinet-header">
+                        <h5><i class="fa-solid fa-cube text-info"></i>Cabinet 3 - Coming Soon</h5>
+                    </div>
+                    <div class="cabinet-body">
+                        <div class="instruments-section">
+                            <h6>Instruments Status</h6>
+                            <div class="alert alert-info">
+                                <i class="fa-solid fa-info-circle me-2"></i>
+                                Cabinet 3 is not yet connected. Default instruments shown.
+                            </div>
+                            <div class="table-container">
+                                <table class="table table-striped table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Saw Blade A</td>
+                                            <td><span class="badge bg-success badge-status">Available</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>Chisel B</td>
+                                            <td><span class="badge bg-success badge-status">Available</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>File C</td>
+                                            <td><span class="badge bg-success badge-status">Available</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>4</td>
+                                            <td>Level D</td>
+                

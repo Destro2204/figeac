@@ -6,10 +6,36 @@
 <div class="p-5 mb-4 bg-light rounded-3">
   <div class="container-fluid py-5">
     <h1 class="display-4">Welcome to Smart Cabinet!</h1>
-    <p class="lead">This is your modern Smart Cabinet web application. Use the navigation bar above to access the Dashboard or learn more About this project.</p>
+    <p class="lead">This is your modern Smart Cabinet web application. Choose your login type to access the appropriate dashboard.</p>
     <hr class="my-4">
-    <p>Get started by exploring the dashboard or reading more about the app.</p>
-    <a class="btn btn-primary btn-lg me-2" href="{{ url_for('dashboard') }}" role="button">Go to Dashboard</a>
+    <p>Select your role to access the appropriate dashboard:</p>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card mb-3">
+          <div class="card-body text-center">
+            <i class="fa-solid fa-user-shield fa-3x text-primary mb-3"></i>
+            <h5 class="card-title">Administrator Access</h5>
+            <p class="card-text">Full system management with access to all features including employee management, access logs, and multi-cabinet monitoring.</p>
+            <a class="btn btn-primary btn-lg" href="{{ url_for('admin_login') }}" role="button">
+              <i class="fa-solid fa-sign-in-alt me-2"></i>Admin Login
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card mb-3">
+          <div class="card-body text-center">
+            <i class="fa-solid fa-users fa-3x text-info mb-3"></i>
+            <h5 class="card-title">Employee Access</h5>
+            <p class="card-text">Operator dashboard for monitoring instrument status and cabinet layout. Limited access for daily operations.</p>
+            <a class="btn btn-info btn-lg" href="{{ url_for('employee_login') }}" role="button">
+              <i class="fa-solid fa-sign-in-alt me-2"></i>Employee Login
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr class="my-4">
     <a class="btn btn-outline-secondary btn-lg" href="{{ url_for('about') }}" role="button">About</a>
   </div>
 </div>
